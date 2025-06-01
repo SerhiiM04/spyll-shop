@@ -4,6 +4,5 @@
   "premium12": 520,
   "starsBase": 1.0,
   "starsPromo": 0.8,
-  "promoLimit": 500,
-  "promoEnabled": true
+  "promoLimit": 500
 }
