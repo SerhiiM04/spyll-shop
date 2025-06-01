@@ -1,14 +1,28 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!DOCTYPE html><html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌟 Spyll Shop</title>
   <style>
+    :root {
+      --bg: #eeeeee;
+      --text: #000000;
+      --card: #ffffff;
+      --highlight: #007bff;
+      --pending: #f1c40f;
+      --approved: #2ecc71;
+      --rejected: #e74c3c;
+    }
+    [data-theme="dark"] {
+      --bg: #1e1e1e;
+      --text: #f0f0f0;
+      --card: #2b2b2b;
+    }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #eeeeee;
+      background: var(--bg);
+      color: var(--text);
       padding: 20px;
     }
     header {
@@ -21,11 +35,16 @@
       font-size: 24px;
       margin: 0;
     }
-    .history-link {
-      font-size: 14px;
-      text-decoration: underline;
-      color: #555;
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .icon-button {
+      background: transparent;
+      border: none;
       cursor: pointer;
+      font-size: 20px;
     }
     .status-badge {
       padding: 6px 12px;
@@ -36,13 +55,13 @@
       display: none;
     }
     .status-pending {
-      background-color: #f1c40f;
+      background-color: var(--pending);
     }
     .status-approved {
-      background-color: #2ecc71;
+      background-color: var(--approved);
     }
     .status-rejected {
-      background-color: #e74c3c;
+      background-color: var(--rejected);
     }
     .product-grid {
       display: grid;
@@ -50,7 +69,7 @@
       gap: 20px;
     }
     .card {
-      background: white;
+      background: var(--card);
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -74,7 +93,7 @@
       margin-bottom: 10px;
     }
     .buy-btn {
-      background-color: #007bff;
+      background-color: var(--highlight);
       color: white;
       padding: 10px 20px;
       border: none;
@@ -100,68 +119,59 @@
       color: #856404;
       font-weight: bold;
     }
-    #history {
-      margin-top: 40px;
+    .bottom-nav {
+      margin-top: 30px;
+      text-align: center;
     }
-    .history-item {
-      background: #fff;
-      border-left: 5px solid #ccc;
-      padding: 10px 15px;
-      margin-bottom: 10px;
+    .bottom-nav button {
+      background: var(--highlight);
+      color: white;
+      border: none;
+      padding: 10px 20px;
       border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>🌟 Spyll Shop</h1>
-    <div>
+    <div class="top-controls">
+      <button class="icon-button" onclick="toggleTheme()">🌓</button>
       <div id="paymentStatus" class="status-badge"></div>
-      <div class="history-link" onclick="scrollToHistory()">🕘 История</div>
     </div>
-  </header>
-
-  <div class="product-grid">
+  </header>  <div class="product-grid">
     <div class="card">
-      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Premium">
+      <img src="/images/premium.png" alt="Telegram Premium">
       <h2>Telegram Premium – 3 мес</h2>
       <p id="price3">Загрузка...</p>
       <button class="buy-btn" onclick="buy('premium3')">Купить</button>
     </div>
-
     <div class="card">
-      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Premium">
+      <img src="/images/premium.png" alt="Telegram Premium">
       <h2>Telegram Premium – 6 мес</h2>
       <p id="price6">Загрузка...</p>
       <button class="buy-btn" onclick="buy('premium6')">Купить</button>
     </div>
-
     <div class="card">
-      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Premium">
+      <img src="/images/premium.png" alt="Telegram Premium">
       <h2>Telegram Premium – 12 мес</h2>
       <p id="price12">Загрузка...</p>
       <button class="buy-btn" onclick="buy('premium12')">Купить</button>
     </div>
-
     <div class="card">
-      <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Звёзды">
+      <img src="/images/stars.png" alt="Звёзды">
       <h2>Покупка звёзд ⭐️</h2>
       <input class="input-field" id="starsAmount" type="number" placeholder="Введите количество звёзд" />
       <p id="starsPrice">0 ₴</p>
       <button class="buy-btn" onclick="buyStars()">Купить</button>
     </div>
-  </div>
-
-  <div id="saleBlock" style="display:none;">
+  </div>  <div id="saleBlock" style="display:none;">
     🎁 Акция! При покупке от <span id="promoLimit">500</span> звёзд — сниженная цена!
-  </div>
-
-  <div id="history">
-    <h3>🧾 История покупок</h3>
-    <div id="historyList"></div>
-  </div>
-
-  <script>
+  </div>  <div class="bottom-nav">
+    <button onclick="window.location.href='/history.html'">🧾 История</button>
+  </div>  <script>
     let prices = {};
 
     async function fetchPrices() {
@@ -189,7 +199,8 @@
     }
 
     function buy(productId) {
-      window.location.href = `/payment?product=${productId}&count=${document.getElementById('starsAmount').value || ''}`;
+      const count = document.getElementById('starsAmount').value || '';
+      window.location.href = `/payment?product=${productId}&count=${count}`;
     }
 
     function buyStars() {
@@ -198,17 +209,29 @@
       window.location.href = `/payment?product=stars&count=${amount}`;
     }
 
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+
+    function applyTheme() {
+      const saved = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', saved);
+    }
+
     async function fetchStatus() {
       const res = await fetch('/api/orders/status');
       const status = await res.json();
 
       const el = document.getElementById('paymentStatus');
       if (status.status === 'pending') {
-        el.textContent = 'Ожидает ⏳';
+        el.textContent = 'Ожидание ⏳';
         el.className = 'status-badge status-pending';
         el.style.display = 'inline-block';
       } else if (status.status === 'approved') {
-        el.textContent = 'Одобрено ✅';
+        el.textContent = 'Оплачено ✅';
         el.className = 'status-badge status-approved';
         el.style.display = 'inline-block';
         setTimeout(() => el.style.display = 'none', 5000);
@@ -220,32 +243,10 @@
       }
     }
 
-    async function fetchHistory() {
-      const res = await fetch('/api/orders/user');
-      const history = await res.json();
-      const list = document.getElementById('historyList');
-      list.innerHTML = '';
-      history.forEach(order => {
-        const div = document.createElement('div');
-        div.className = 'history-item';
-        div.innerHTML = `
-          <strong>${order.description}</strong><br>
-          ${order.price} ₴ — <em>${order.status}</em>
-          ${order.reason ? `<br><small>Причина: ${order.reason}</small>` : ''}
-        `;
-        list.appendChild(div);
-      });
-    }
-
-    function scrollToHistory() {
-      document.getElementById('history').scrollIntoView({ behavior: 'smooth' });
-    }
-
     document.getElementById('starsAmount').addEventListener('input', updateStarPrice);
 
+    applyTheme();
     fetchPrices();
     fetchStatus();
-    fetchHistory();
-  </script>
-</body>
+  </script></body>
 </html>
