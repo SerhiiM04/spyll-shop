@@ -1,114 +1,92 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Оплата заказа</title>
   <style>
     :root {
-      --bg-light: #f0f0f0;
-      --bg-dark: #121212;
-      --text-light: #000;
-      --text-dark: #fff;
-      --card-light: #fff;
-      --card-dark: #1f1f1f;
-      --accent: #007bff;
+      --bg: #eeeeee;
+      --card-bg: #ffffff;
+      --text-color: #000;
     }
-
-    html[data-theme='light'] {
-      --bg: var(--bg-light);
-      --text: var(--text-light);
-      --card: var(--card-light);
+    body.dark {
+      --bg: #1e1e1e;
+      --card-bg: #2b2b2b;
+      --text-color: #f0f0f0;
     }
-
-    html[data-theme='dark'] {
-      --bg: var(--bg-dark);
-      --text: var(--text-dark);
-      --card: var(--card-dark);
-    }
-
     body {
+      background: var(--bg);
+      color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       padding: 20px;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-
     .container {
-      max-width: 450px;
-      margin: 40px auto;
-      background: var(--card);
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 30px;
       border-radius: 16px;
-      padding: 25px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
     }
-
     h2 {
       margin-bottom: 20px;
+      text-align: center;
     }
-
     .payment-info {
+      position: relative;
       background: #f9f9f9;
       padding: 15px;
       border-radius: 10px;
-      margin-bottom: 20px;
       font-size: 16px;
-      text-align: left;
-      position: relative;
+      margin-bottom: 20px;
+      color: #000;
     }
-
-    .payment-info strong {
-      display: block;
-      margin-top: 10px;
-    }
-
     .copy-btn {
       position: absolute;
-      top: 16px;
-      right: 16px;
-      background: var(--accent);
-      color: white;
+      top: 12px;
+      right: 12px;
+      font-size: 12px;
+      padding: 5px 10px;
       border: none;
-      padding: 6px 10px;
+      background: #007bff;
+      color: white;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 12px;
     }
-
     input, button {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
       border-radius: 8px;
-      border: 1px solid #ccc;
       font-size: 15px;
+      border: 1px solid #ccc;
     }
-
     input[type="file"] {
       padding: 8px;
     }
-
-    .btn-confirm {
+    .submit {
       background: #00b894;
       color: white;
       font-weight: bold;
       border: none;
-      margin-bottom: 10px;
+      margin-top: 15px;
     }
-
-    .btn-cancel {
+    .submit:hover {
+      background: #019875;
+    }
+    .cancel {
       background: #e74c3c;
       color: white;
       font-weight: bold;
       border: none;
     }
-
     .success-message {
       color: green;
       font-weight: bold;
       margin-top: 15px;
+      text-align: center;
     }
   </style>
 </head>
@@ -116,31 +94,28 @@
   <div class="container">
     <h2>Оплата заказа</h2>
     <div class="payment-info">
-      <p><strong>Перевод на карту:</strong><br> <span id="cardNumber">5355 2802 1897 6700</span></p>
-      <button class="copy-btn" onclick="copyCard()">Скопировать</button>
+      <p><strong>Карта для перевода:</strong><br><span id="cardNumber">5355 2802 1897 6700</span></p>
+      <button class="copy-btn" onclick="copyCard()">📋 Скопировать</button>
       <p><strong>Сумма к оплате:</strong> <span id="price">0</span> ₴</p>
-      <p><strong>Комментарий к платежу:</strong> Подарок</p>
-      <p>Прикрепите скриншот (PDF или PNG), затем нажмите кнопку подтверждения ⤵️</p>
+      <p><strong>Комментарий:</strong> Подарок</p>
     </div>
+
     <input type="file" id="screenshot" accept="image/*,.pdf">
-    <button class="btn-confirm" onclick="submitPayment()">Подтвердить оплату</button>
-    <button class="btn-cancel" onclick="cancel()">Отмена</button>
+    <button class="submit" onclick="submitPayment()">Подтвердить оплату</button>
+    <button class="cancel" onclick="window.location.href='/'">Отмена</button>
     <p class="success-message" id="successMessage"></p>
   </div>
 
   <script>
-    let prices = {};
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
     const stars = parseInt(urlParams.get('count')) || 0;
 
+    let prices = {};
+
     async function fetchPrices() {
       const res = await fetch('/api/prices');
       prices = await res.json();
-      calculatePrice();
-    }
-
-    function calculatePrice() {
       let price = 0;
       if (productId === 'premium3') price = prices.premium3;
       else if (productId === 'premium6') price = prices.premium6;
@@ -153,14 +128,14 @@
     }
 
     async function submitPayment() {
-      const fileInput = document.getElementById('screenshot');
-      if (!fileInput.files.length) {
-        alert('Пожалуйста, прикрепите скриншот оплаты.');
+      const file = document.getElementById('screenshot').files[0];
+      if (!file) {
+        alert('Прикрепите скриншот оплаты!');
         return;
       }
 
       const formData = new FormData();
-      formData.append('screenshot', fileInput.files[0]);
+      formData.append('screenshot', file);
       formData.append('productId', productId);
       formData.append('stars', stars);
 
@@ -173,19 +148,15 @@
         document.getElementById('successMessage').textContent = 'Платёж отправлен. Ожидайте подтверждения.';
         setTimeout(() => window.location.href = '/', 3000);
       } else {
-        alert('Ошибка при отправке платежа.');
+        alert('Ошибка при отправке.');
       }
     }
 
     function copyCard() {
-      const card = document.getElementById('cardNumber').innerText;
+      const card = document.getElementById('cardNumber').textContent;
       navigator.clipboard.writeText(card).then(() => {
         alert('Номер карты скопирован!');
       });
-    }
-
-    function cancel() {
-      window.location.href = '/';
     }
 
     fetchPrices();
