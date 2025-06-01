@@ -34,7 +34,6 @@ function saveOrders(data) {
   fs.writeFileSync(ordersPath, JSON.stringify(data, null, 2));
 }
 
-// Хранилище последнего заказа по userId
 const latestOrders = {};
 
 app.get('/api/prices', (req, res) => {
@@ -61,7 +60,7 @@ app.post('/api/submit-payment', upload.single('screenshot'), (req, res) => {
     stars: +req.body.stars || 0,
     price: calculatePrice(config, req.body),
     status: 'pending',
-    fileName: req.file?.filename,
+    fileName: req.file?.filename || '',
     timestamp: Date.now(),
     reason: '',
   };
@@ -108,6 +107,15 @@ app.post('/api/orders/:id/status', (req, res) => {
   orders[index].reason = req.body.reason || '';
   saveOrders(orders);
   res.sendStatus(200);
+});
+
+// HTML роуты
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/payment', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'payment.html'));
 });
 
 app.listen(PORT, () => console.log(`Server started on ${PORT}`));
