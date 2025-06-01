@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="ru">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,6 +21,16 @@
       font-size: 24px;
       margin: 0;
     }
+    .icon-history {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .icon-history span {
+      margin-left: 8px;
+      font-size: 12px;
+      color: #333;
+    }
     .status-badge {
       padding: 6px 12px;
       border-radius: 20px;
@@ -28,15 +39,10 @@
       color: white;
       display: none;
     }
-    .status-pending {
-      background-color: #f1c40f;
-    }
-    .status-approved {
-      background-color: #2ecc71;
-    }
-    .status-rejected {
-      background-color: #e74c3c;
-    }
+    .status-pending { background-color: #f1c40f; }
+    .status-approved { background-color: #2ecc71; }
+    .status-rejected { background-color: #e74c3c; }
+
     .card {
       background: white;
       border-radius: 10px;
@@ -60,13 +66,14 @@
       border: 1px solid #ccc;
       border-radius: 8px;
     }
-    #historyIcon {
-      font-size: 20px;
-      cursor: pointer;
-      text-align: center;
+
+    #saleBlock {
+      display: none;
     }
-    #historyList {
-      margin-top: 10px;
+
+    #history {
+      display: none;
+      margin-top: 40px;
     }
     .history-item {
       background: #fff;
@@ -80,11 +87,15 @@
 <body>
   <header>
     <h1>🌟 Spyll Shop</h1>
-    <div>
+    <div style="display: flex; align-items: center; gap: 10px;">
       <div id="paymentStatus" class="status-badge"></div>
-      <div id="historyIcon" onclick="toggleHistory()">🕘<br><small>История</small></div>
+      <div class="icon-history" onclick="toggleHistory()">
+        📜<span>История</span>
+      </div>
     </div>
-  </header>  <div class="card">
+  </header>
+
+  <div class="card">
     <h2>Telegram Premium – 3 месяца</h2>
     <p id="price3">Загрузка...</p>
     <button class="buy-btn" onclick="buy('premium3')">Купить</button>
@@ -99,16 +110,25 @@
     <p id="price12">Загрузка...</p>
     <button class="buy-btn" onclick="buy('premium12')">Купить</button>
   </div>
+
   <div class="card">
     <h2>Покупка звёзд ⭐️</h2>
     <input class="input-field" id="starsAmount" type="number" placeholder="Введите количество звёзд" />
     <p id="starsPrice">0 ₴</p>
     <button class="buy-btn" onclick="buyStars()">Купить</button>
   </div>
-  <div class="card" id="saleBlock" style="display: none;">
+
+  <div class="card" id="saleBlock">
     <h3>🎁 Акция на звёзды!</h3>
     <p>При покупке от <span id="promoLimit">500</span> звёзд — цена ниже!</p>
-  </div>  <div id="historyList" style="display:none;"></div>  <script>
+  </div>
+
+  <div id="history">
+    <h3>🕘 История покупок</h3>
+    <div id="historyList"></div>
+  </div>
+
+  <script>
     let prices = {};
 
     async function fetchPrices() {
@@ -119,15 +139,17 @@
       document.getElementById('price6').innerText = prices.premium6 + ' ₴';
       document.getElementById('price12').innerText = prices.premium12 + ' ₴';
       document.getElementById('promoLimit').innerText = prices.promoLimit;
-      if (prices.promoEnabled) {
+
+      if (prices.promoLimit && prices.starsPromo < prices.starsBase) {
         document.getElementById('saleBlock').style.display = 'block';
       }
+
       updateStarPrice();
     }
 
     function updateStarPrice() {
       const stars = parseInt(document.getElementById('starsAmount').value || 0);
-      const usePromo = stars >= prices.promoLimit && prices.promoEnabled;
+      const usePromo = stars >= prices.promoLimit;
       const perStar = usePromo ? prices.starsPromo : prices.starsBase;
       const total = (stars * perStar).toFixed(2);
       document.getElementById('starsPrice').innerText = total + ' ₴';
@@ -146,7 +168,11 @@
     document.getElementById('starsAmount').addEventListener('input', updateStarPrice);
 
     async function fetchStatus() {
-      const res = await fetch('/api/orders/status');
+      const res = await fetch('/api/orders/status', {
+        headers: {
+          'x-telegram-id': localStorage.getItem('telegramId') || 'user'
+        }
+      });
       const status = await res.json();
 
       const el = document.getElementById('paymentStatus');
@@ -168,7 +194,11 @@
     }
 
     async function fetchHistory() {
-      const res = await fetch('/api/orders/user');
+      const res = await fetch('/api/orders/user', {
+        headers: {
+          'x-telegram-id': localStorage.getItem('telegramId') || 'user'
+        }
+      });
       const history = await res.json();
       const list = document.getElementById('historyList');
       list.innerHTML = '';
@@ -185,12 +215,13 @@
     }
 
     function toggleHistory() {
-      const list = document.getElementById('historyList');
-      list.style.display = list.style.display === 'none' ? 'block' : 'none';
+      const el = document.getElementById('history');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 
     fetchPrices();
     fetchStatus();
     fetchHistory();
-  </script></body>
+  </script>
+</body>
 </html>
