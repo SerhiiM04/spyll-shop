@@ -59,25 +59,25 @@
 
   <div class="card">
     <h2>Telegram Premium – 3 месяца</h2>
-    <p id="price3">150 ₴</p>
+    <p id="price3">Загрузка...</p>
     <button class="buy-btn" onclick="buy('premium3')">Купить</button>
   </div>
 
   <div class="card">
     <h2>Telegram Premium – 6 месяцев</h2>
-    <p id="price6">280 ₴</p>
+    <p id="price6">Загрузка...</p>
     <button class="buy-btn" onclick="buy('premium6')">Купить</button>
   </div>
 
   <div class="card">
     <h2>Telegram Premium – 12 месяцев</h2>
-    <p id="price12">520 ₴</p>
+    <p id="price12">Загрузка...</p>
     <button class="buy-btn" onclick="buy('premium12')">Купить</button>
   </div>
 
   <div class="card">
     <h2>Покупка звёзд ⭐️</h2>
-    <input class="input-field" type="number" id="starsAmount" placeholder="Введите количество звёзд" />
+    <input class="input-field" type="number" id="starsAmount" placeholder="Введите количество звёзд" min="1"/>
     <p id="starsPrice">0 ₴</p>
     <button class="buy-btn" onclick="buyStars()">Купить</button>
   </div>
@@ -88,16 +88,27 @@
   </div>
 
   <script>
-    let prices = {};
+    let prices = {
+      premium3: 150,
+      premium6: 280,
+      premium12: 520,
+      starsBase: 1,
+      starsPromo: 0.8,
+      promoLimit: 500
+    };
 
     async function fetchPrices() {
-      const res = await fetch('/api/prices');
-      prices = await res.json();
+      try {
+        const res = await fetch('/api/prices');
+        prices = await res.json();
+      } catch (e) {
+        console.warn('Не удалось загрузить цены, используются значения по умолчанию');
+      }
 
       document.getElementById('price3').innerText = prices.premium3 + ' ₴';
       document.getElementById('price6').innerText = prices.premium6 + ' ₴';
       document.getElementById('price12').innerText = prices.premium12 + ' ₴';
-      document.getElementById('promoLimit').innerText = prices.promoLimit || 500;
+      document.getElementById('promoLimit').innerText = prices.promoLimit;
 
       updateStarPrice();
       document.getElementById('saleBlock').style.display = 'block';
@@ -105,7 +116,8 @@
 
     function updateStarPrice() {
       const stars = parseInt(document.getElementById('starsAmount').value || 0);
-      let perStar = stars >= (prices.promoLimit || 500) ? prices.starsPromo : prices.starsBase;
+      const usePromo = stars >= prices.promoLimit;
+      const perStar = usePromo ? prices.starsPromo : prices.starsBase;
       const total = (stars * perStar).toFixed(2);
       document.getElementById('starsPrice').innerText = total + ' ₴';
     }
@@ -121,7 +133,6 @@
     }
 
     document.getElementById('starsAmount').addEventListener('input', updateStarPrice);
-
     fetchPrices();
   </script>
 </body>
