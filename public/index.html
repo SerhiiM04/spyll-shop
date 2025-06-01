@@ -77,4 +77,14 @@
     });
 
     function buy(productId) {
-      const product = products.find(p
+      const product = products.find(p => p.id === productId);
+      if (!product) return alert('Товар не найден');
+
+      Telegram.WebApp.showAlert(
+        `Вы выбрали: ${product.title}\nЦена: ${product.price} ₴`
+      );
+
+      // Тут можно вызвать WebApp.sendData или открыть инвойс через Telegram бота
+    }
+  </script></body>
+</html>
