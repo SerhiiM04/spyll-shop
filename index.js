@@ -9,16 +9,25 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Статические файлы
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 app.use('/images', express.static('images'));
 
+// Убедиться, что директории существуют
+if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+if (!fs.existsSync('images')) fs.mkdirSync('images');
+
+// Настройки загрузки файлов
 const upload = multer({ dest: 'uploads/' });
 const imageUpload = multer({ dest: 'images/' });
 
+// Пути к конфигам
 const configPath = './config.json';
 const ordersPath = './orders.json';
 
+// Работа с конфигурацией
 function loadConfig() {
   return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 }
@@ -36,8 +45,10 @@ function saveOrders(data) {
   fs.writeFileSync(ordersPath, JSON.stringify(data, null, 2));
 }
 
+// Временное хранилище заказов
 const latestOrders = {};
 
+// API маршруты
 app.get('/api/prices', (req, res) => {
   res.json(loadConfig());
 });
@@ -125,4 +136,23 @@ app.post('/api/orders/:id/status', (req, res) => {
   res.sendStatus(200);
 });
 
+// HTML-маршруты
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/payment', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'payment.html'));
+});
+
+// Обработка 404
+app.use((req, res) => {
+  res.status(404).send('Страница не найдена');
+});
+
+// Запуск сервера
 app.listen(PORT, () => console.log(`✅ Сервер запущен на порту ${PORT}`));
