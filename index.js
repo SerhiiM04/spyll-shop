@@ -9,25 +9,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-
-// Статические файлы
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 app.use('/images', express.static('images'));
 
-// Убедиться, что директории существуют
-if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
-if (!fs.existsSync('images')) fs.mkdirSync('images');
-
-// Настройки загрузки файлов
 const upload = multer({ dest: 'uploads/' });
 const imageUpload = multer({ dest: 'images/' });
 
-// Пути к конфигам
 const configPath = './config.json';
 const ordersPath = './orders.json';
 
-// Работа с конфигурацией
 function loadConfig() {
   return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 }
@@ -45,10 +36,6 @@ function saveOrders(data) {
   fs.writeFileSync(ordersPath, JSON.stringify(data, null, 2));
 }
 
-// Временное хранилище заказов
-const latestOrders = {};
-
-// API маршруты
 app.get('/api/prices', (req, res) => {
   res.json(loadConfig());
 });
@@ -62,10 +49,13 @@ app.post('/api/upload-images', imageUpload.fields([
   { name: 'premium', maxCount: 1 },
   { name: 'stars', maxCount: 1 }
 ]), (req, res) => {
-  const files = req.files;
   const config = loadConfig();
-  if (files.premium) config.premiumImage = `/images/${files.premium[0].filename}`;
-  if (files.stars) config.starsImage = `/images/${files.stars[0].filename}`;
+  if (req.files.premium) {
+    config.premiumImage = `/images/${req.files.premium[0].filename}`;
+  }
+  if (req.files.stars) {
+    config.starsImage = `/images/${req.files.stars[0].filename}`;
+  }
   saveConfig(config);
   res.sendStatus(200);
 });
@@ -85,14 +75,13 @@ app.post('/api/submit-payment', upload.single('screenshot'), (req, res) => {
     stars: +req.body.stars || 0,
     price: calculatePrice(config, req.body),
     status: 'pending',
-    fileName: req.file?.filename,
+    fileName: req.file?.filename || '',
     timestamp: Date.now(),
     reason: '',
   };
 
   orders.push(newOrder);
   saveOrders(orders);
-  latestOrders[newOrder.userId] = newOrder;
   res.sendStatus(200);
 });
 
@@ -113,16 +102,14 @@ app.get('/api/orders', (req, res) => {
 
 app.get('/api/orders/status', (req, res) => {
   const id = req.headers['x-telegram-id'];
-  const orders = loadOrders();
-  const order = orders.reverse().find(o => o.userId == id);
+  const order = loadOrders().reverse().find(o => o.userId == id);
   if (!order) return res.json({ status: null });
   res.json({ status: order.status });
 });
 
 app.get('/api/orders/user', (req, res) => {
   const id = req.headers['x-telegram-id'];
-  const orders = loadOrders();
-  const userOrders = orders.filter(o => o.userId == id);
+  const userOrders = loadOrders().filter(o => o.userId == id);
   res.json(userOrders);
 });
 
@@ -136,23 +123,4 @@ app.post('/api/orders/:id/status', (req, res) => {
   res.sendStatus(200);
 });
 
-// HTML-маршруты
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-app.get('/payment', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'payment.html'));
-});
-
-// Обработка 404
-app.use((req, res) => {
-  res.status(404).send('Страница не найдена');
-});
-
-// Запуск сервера
 app.listen(PORT, () => console.log(`✅ Сервер запущен на порту ${PORT}`));
