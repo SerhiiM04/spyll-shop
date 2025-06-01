@@ -11,8 +11,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
+app.use('/images', express.static('images'));
 
 const upload = multer({ dest: 'uploads/' });
+const imageUpload = multer({ dest: 'images/' });
 
 const configPath = './config.json';
 const ordersPath = './orders.json';
@@ -45,6 +47,18 @@ app.post('/api/prices', (req, res) => {
   res.sendStatus(200);
 });
 
+app.post('/api/upload-images', imageUpload.fields([
+  { name: 'premium', maxCount: 1 },
+  { name: 'stars', maxCount: 1 }
+]), (req, res) => {
+  const files = req.files;
+  const config = loadConfig();
+  if (files.premium) config.premiumImage = `/images/${files.premium[0].filename}`;
+  if (files.stars) config.starsImage = `/images/${files.stars[0].filename}`;
+  saveConfig(config);
+  res.sendStatus(200);
+});
+
 app.post('/api/submit-payment', upload.single('screenshot'), (req, res) => {
   const config = loadConfig();
   const orders = loadOrders();
@@ -60,7 +74,7 @@ app.post('/api/submit-payment', upload.single('screenshot'), (req, res) => {
     stars: +req.body.stars || 0,
     price: calculatePrice(config, req.body),
     status: 'pending',
-    fileName: req.file?.filename || '',
+    fileName: req.file?.filename,
     timestamp: Date.now(),
     reason: '',
   };
@@ -107,15 +121,6 @@ app.post('/api/orders/:id/status', (req, res) => {
   orders[index].reason = req.body.reason || '';
   saveOrders(orders);
   res.sendStatus(200);
-});
-
-// HTML роуты
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-app.get('/payment', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'payment.html'));
 });
 
 app.listen(PORT, () => console.log(`Server started on ${PORT}`));
