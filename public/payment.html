@@ -1,121 +1,76 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Оплата заказа</title>
+  <link rel="stylesheet" href="styles.css" />
   <style>
-    :root {
-      --bg: #eeeeee;
-      --card-bg: #ffffff;
-      --text-color: #000;
-    }
-    body.dark {
-      --bg: #1e1e1e;
-      --card-bg: #2b2b2b;
-      --text-color: #f0f0f0;
-    }
-    body {
-      background: var(--bg);
-      color: var(--text-color);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 480px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      padding: 30px;
+    .payment-box {
+      max-width: 450px;
+      margin: 40px auto;
+      background: white;
       border-radius: 16px;
+      padding: 25px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    h2 {
-      margin-bottom: 20px;
       text-align: center;
     }
     .payment-info {
-      position: relative;
+      text-align: left;
       background: #f9f9f9;
       padding: 15px;
       border-radius: 10px;
-      font-size: 16px;
       margin-bottom: 20px;
-      color: #000;
+      position: relative;
     }
     .copy-btn {
       position: absolute;
       top: 12px;
       right: 12px;
-      font-size: 12px;
-      padding: 5px 10px;
-      border: none;
       background: #007bff;
       color: white;
+      border: none;
+      padding: 5px 10px;
       border-radius: 6px;
       cursor: pointer;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      font-size: 15px;
-      border: 1px solid #ccc;
-    }
-    input[type="file"] {
-      padding: 8px;
-    }
-    .submit {
-      background: #00b894;
-      color: white;
-      font-weight: bold;
-      border: none;
-      margin-top: 15px;
-    }
-    .submit:hover {
-      background: #019875;
-    }
-    .cancel {
-      background: #e74c3c;
-      color: white;
-      font-weight: bold;
-      border: none;
+      font-size: 12px;
     }
     .success-message {
       color: green;
       font-weight: bold;
       margin-top: 15px;
-      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="payment-box">
     <h2>Оплата заказа</h2>
     <div class="payment-info">
-      <p><strong>Карта для перевода:</strong><br><span id="cardNumber">5355 2802 1897 6700</span></p>
-      <button class="copy-btn" onclick="copyCard()">📋 Скопировать</button>
+      <p><strong>Карта:</strong> <span id="cardNumber">5355 2802 1897 6700</span></p>
+      <button class="copy-btn" onclick="copyCard()">📋</button>
       <p><strong>Сумма к оплате:</strong> <span id="price">0</span> ₴</p>
       <p><strong>Комментарий:</strong> Подарок</p>
+      <p>После перевода прикрепите скриншот или PDF и подтвердите оплату:</p>
     </div>
-
     <input type="file" id="screenshot" accept="image/*,.pdf">
-    <button class="submit" onclick="submitPayment()">Подтвердить оплату</button>
-    <button class="cancel" onclick="window.location.href='/'">Отмена</button>
+    <button class="btn btn-green" onclick="submitPayment()">Подтвердить оплату</button>
+    <button class="btn btn-red" onclick="cancel()">Отмена</button>
     <p class="success-message" id="successMessage"></p>
   </div>
 
   <script>
+    let prices = {};
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
     const stars = parseInt(urlParams.get('count')) || 0;
 
-    let prices = {};
-
     async function fetchPrices() {
       const res = await fetch('/api/prices');
       prices = await res.json();
+      calculatePrice();
+    }
+
+    function calculatePrice() {
       let price = 0;
       if (productId === 'premium3') price = prices.premium3;
       else if (productId === 'premium6') price = prices.premium6;
@@ -128,14 +83,14 @@
     }
 
     async function submitPayment() {
-      const file = document.getElementById('screenshot').files[0];
-      if (!file) {
-        alert('Прикрепите скриншот оплаты!');
+      const fileInput = document.getElementById('screenshot');
+      if (!fileInput.files.length) {
+        alert('Прикрепите скриншот!');
         return;
       }
 
       const formData = new FormData();
-      formData.append('screenshot', file);
+      formData.append('screenshot', fileInput.files[0]);
       formData.append('productId', productId);
       formData.append('stars', stars);
 
@@ -153,10 +108,14 @@
     }
 
     function copyCard() {
-      const card = document.getElementById('cardNumber').textContent;
+      const card = document.getElementById('cardNumber').innerText;
       navigator.clipboard.writeText(card).then(() => {
-        alert('Номер карты скопирован!');
+        alert('Номер скопирован!');
       });
+    }
+
+    function cancel() {
+      window.location.href = '/';
     }
 
     fetchPrices();
