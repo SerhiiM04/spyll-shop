@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Оплата заказа</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
+      background: #eeeeee;
       margin: 0;
       padding: 20px;
     }
@@ -59,15 +59,22 @@
     input[type="file"] {
       padding: 8px;
     }
-    button.submit {
+    .submit {
       background: #00b894;
       color: white;
       font-weight: bold;
       cursor: pointer;
       border: none;
     }
-    button.submit:hover {
+    .submit:hover {
       background: #019875;
+    }
+    .cancel {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
     }
     .success-message {
       color: green;
@@ -82,12 +89,13 @@
     <div class="payment-info">
       <p><strong>Перевод на карту:</strong><br> <span id="cardNumber">5355 2802 1897 6700</span></p>
       <button class="copy-btn" onclick="copyCard()">📋 Скопировать</button>
-      <p><strong>Сумма к оплате:</strong> <span id="price">0</span> UAH</p>
+      <p><strong>Сумма к оплате:</strong> <span id="price">0</span> ₴</p>
       <p><strong>Комментарий к платежу:</strong> Подарок</p>
       <p>После перевода обязательно отправьте скриншот PDF или PNG, после этого нажмите кнопку ниже ⤵️</p>
     </div>
     <input type="file" id="screenshot" accept="image/*,.pdf">
-    <button class="submit" onclick="submitPayment()">Подтвердить Оплату</button>
+    <button class="submit" onclick="submitPayment()">Подтвердить оплату</button>
+    <button class="cancel" onclick="cancel()">Отмена</button>
     <p class="success-message" id="successMessage"></p>
   </div>
 
@@ -129,10 +137,6 @@
 
       const res = await fetch('/api/submit-payment', {
         method: 'POST',
-        headers: {
-          'x-telegram-id': localStorage.getItem('telegramId') || 'user',
-          'x-telegram-user': localStorage.getItem('telegramUser') || ''
-        },
         body: formData
       });
 
@@ -149,6 +153,10 @@
       navigator.clipboard.writeText(card).then(() => {
         alert('Номер карты скопирован!');
       });
+    }
+
+    function cancel() {
+      window.location.href = '/';
     }
 
     fetchPrices();
