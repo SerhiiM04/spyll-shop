@@ -3,33 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spyll Shop</title>
+  <title>🌟 Spyll Shop</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
   <style>
     :root {
       --bg-light: #eeeeee;
       --bg-dark: #121212;
-      --card-bg-light: #ffffff;
-      --card-bg-dark: #1e1e1e;
-      --text-light: #111;
-      --text-dark: #eee;
-      --primary: #007bff;
+      --card-light: #ffffff;
+      --card-dark: #1f1f1f;
+      --text-light: #000000;
+      --text-dark: #ffffff;
+      --blue: #007bff;
+      --yellow: #f1c40f;
       --green: #2ecc71;
       --red: #e74c3c;
-      --yellow: #f1c40f;
     }
 
     body {
+      font-family: 'Inter', sans-serif;
       margin: 0;
       padding: 20px;
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-light);
+      background: var(--bg-light);
       color: var(--text-light);
-      transition: background 0.3s, color 0.3s;
+      transition: 0.3s;
     }
 
     body.dark {
-      background-color: var(--bg-dark);
+      background: var(--bg-dark);
       color: var(--text-dark);
     }
 
@@ -37,198 +37,203 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
-    .toggle-theme {
-      cursor: pointer;
-      font-size: 18px;
-      padding: 6px 10px;
-      background: #ccc;
-      border-radius: 10px;
-      margin-right: 12px;
+    h1 {
+      font-size: 24px;
+      margin: 0;
     }
 
-    .status-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--yellow);
-      display: none;
-      justify-content: center;
+    .top-right {
+      display: flex;
       align-items: center;
-      color: #fff;
-      font-size: 14px;
+      gap: 10px;
     }
 
-    .product-grid {
+    .theme-toggle {
+      cursor: pointer;
+      font-size: 22px;
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      display: none;
+    }
+
+    .status-pending {
+      background-color: var(--yellow);
+    }
+
+    .status-approved {
+      background-color: var(--green);
+    }
+
+    .status-rejected {
+      background-color: var(--red);
+    }
+
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
 
     .card {
-      background-color: var(--card-bg-light);
-      border-radius: 14px;
+      background: var(--card-light);
       padding: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: background 0.3s;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: 0.3s;
     }
 
     body.dark .card {
-      background-color: var(--card-bg-dark);
+      background: var(--card-dark);
     }
 
     .card img {
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       object-fit: contain;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .card h2 {
-      font-size: 18px;
-      margin: 0 0 8px;
+      margin: 10px 0 5px;
+      font-size: 17px;
+    }
+
+    .card p {
+      margin: 5px 0 15px;
     }
 
     .buy-btn {
-      background-color: var(--primary);
+      background-color: var(--blue);
       color: white;
-      padding: 10px;
       border: none;
-      border-radius: 10px;
+      padding: 10px 20px;
+      border-radius: 8px;
       cursor: pointer;
-      width: 100%;
       font-weight: bold;
-      transition: background 0.2s;
-    }
-
-    .buy-btn:hover {
-      background-color: #0056b3;
+      width: 100%;
     }
 
     .input-field {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
+      font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 8px;
+      margin-bottom: 10px;
     }
 
-    #saleBlock {
+    .promo {
       background: #fff3cd;
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 20px;
-      text-align: center;
       color: #856404;
+      padding: 12px;
+      margin: 20px 0;
+      border-radius: 10px;
+      text-align: center;
       font-weight: bold;
     }
 
-    #historyBtn {
+    body.dark .promo {
+      background: #333;
+      color: #f9d976;
+    }
+
+    .history-button {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: var(--primary);
+      background: var(--blue);
       color: white;
       border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      font-size: 22px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 12px 18px;
+      font-weight: bold;
+      border-radius: 50px;
+      font-size: 15px;
       cursor: pointer;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: var(--card-bg-light);
-      padding: 20px;
-      max-width: 400px;
-      width: 90%;
-      border-radius: 14px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .modal-content h3 {
-      margin-top: 0;
-    }
-
-    body.dark .modal-content {
-      background: var(--card-bg-dark);
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Spyll Shop</h1>
-    <div style="display: flex; align-items: center;">
-      <div class="toggle-theme" onclick="toggleTheme()">🌞</div>
-      <div id="statusIcon" class="status-icon">⏳</div>
+    <h1>🌟 Spyll Shop</h1>
+    <div class="top-right">
+      <div id="themeBtn" class="theme-toggle">🌞</div>
+      <div id="paymentStatus" class="status-badge"></div>
     </div>
   </header>
 
-  <div class="product-grid" id="products">
-    <!-- Продукты добавятся через JS -->
-  </div>
+  <div class="grid">
+    <div class="card">
+      <img id="imgPremium" src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Premium">
+      <h2>Telegram Premium – 3 мес</h2>
+      <p id="price3">Загрузка...</p>
+      <button class="buy-btn" onclick="buy('premium3')">Купить</button>
+    </div>
 
-  <div id="saleBlock" style="display: none;">
-    🎁 Акция! При покупке от <span id="promoLimit">500</span> звёзд — сниженная цена!
-  </div>
+    <div class="card">
+      <img id="imgPremium6" src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Premium">
+      <h2>Telegram Premium – 6 мес</h2>
+      <p id="price6">Загрузка...</p>
+      <button class="buy-btn" onclick="buy('premium6')">Купить</button>
+    </div>
 
-  <button id="historyBtn" onclick="openHistory()">📜</button>
+    <div class="card">
+      <img id="imgPremium12" src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Premium">
+      <h2>Telegram Premium – 12 мес</h2>
+      <p id="price12">Загрузка...</p>
+      <button class="buy-btn" onclick="buy('premium12')">Купить</button>
+    </div>
 
-  <div class="modal" id="historyModal" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <h3>История покупок</h3>
-      <div id="historyList"></div>
-      <button onclick="closeHistory()">Назад</button>
+    <div class="card">
+      <img id="imgStars" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Звезды">
+      <h2>Покупка звёзд</h2>
+      <input class="input-field" type="number" id="starsAmount" placeholder="Введите количество звёзд" />
+      <p id="starsPrice">0 ₴</p>
+      <button class="buy-btn" onclick="buyStars()">Купить</button>
     </div>
   </div>
 
+  <div id="saleBlock" class="promo" style="display: none;">
+    🎁 Акция! При покупке от <span id="promoLimit">500</span> звёзд — сниженная цена!
+  </div>
+
+  <button class="history-button" onclick="window.location.href='/history.html'">🧾 История</button>
+
   <script>
     let prices = {};
-    let dark = false;
 
     async function fetchPrices() {
       const res = await fetch('/api/prices');
       prices = await res.json();
 
-      const products = document.getElementById('products');
-      products.innerHTML = `
-        ${['3','6','12'].map(m => `
-          <div class="card">
-            <img src="${prices.premiumImage || '/images/default-premium.png'}" />
-            <h2>Telegram Premium – ${m} мес</h2>
-            <p>${prices['premium'+m]} ₴</p>
-            <button class="buy-btn" onclick="buy('premium${m}')">Купить</button>
-          </div>
-        `).join('')}
-        <div class="card">
-          <img src="${prices.starsImage || '/images/default-stars.png'}" />
-          <h2>Покупка звёзд</h2>
-          <input class="input-field" id="starsAmount" type="number" placeholder="Количество звёзд" oninput="updateStarPrice()" />
-          <p id="starsPrice">0 ₴</p>
-          <button class="buy-btn" onclick="buyStars()">Купить</button>
-        </div>
-      `;
+      document.getElementById('price3').innerText = prices.premium3 + ' ₴';
+      document.getElementById('price6').innerText = prices.premium6 + ' ₴';
+      document.getElementById('price12').innerText = prices.premium12 + ' ₴';
+      document.getElementById('promoLimit').innerText = prices.promoLimit;
 
       if (prices.starsPromo && prices.promoLimit) {
         document.getElementById('saleBlock').style.display = 'block';
-        document.getElementById('promoLimit').innerText = prices.promoLimit;
       }
+
+      if (prices.premiumImage) {
+        document.getElementById('imgPremium').src = prices.premiumImage;
+        document.getElementById('imgPremium6').src = prices.premiumImage;
+        document.getElementById('imgPremium12').src = prices.premiumImage;
+      }
+      if (prices.starsImage) {
+        document.getElementById('imgStars').src = prices.starsImage;
+      }
+
+      updateStarPrice();
     }
 
     function updateStarPrice() {
@@ -239,7 +244,7 @@
     }
 
     function buy(productId) {
-      const stars = document.getElementById('starsAmount')?.value || '';
+      const stars = document.getElementById('starsAmount').value || '';
       window.location.href = `/payment?product=${productId}&count=${stars}`;
     }
 
@@ -252,44 +257,31 @@
     async function fetchStatus() {
       const res = await fetch('/api/orders/status');
       const status = await res.json();
-      const icon = document.getElementById('statusIcon');
-      if (status.status === 'pending') icon.style.display = 'flex';
-      else icon.style.display = 'none';
+      const el = document.getElementById('paymentStatus');
+
+      if (status.status === 'pending') {
+        el.textContent = 'Ожидание ⏳';
+        el.className = 'status-badge status-pending';
+        el.style.display = 'inline-block';
+      } else if (status.status === 'approved') {
+        el.textContent = 'Одобрено ✅';
+        el.className = 'status-badge status-approved';
+        el.style.display = 'inline-block';
+        setTimeout(() => el.style.display = 'none', 6000);
+      } else if (status.status === 'rejected') {
+        el.textContent = 'Отклонено ❌';
+        el.className = 'status-badge status-rejected';
+        el.style.display = 'inline-block';
+        setTimeout(() => el.style.display = 'none', 6000);
+      }
     }
 
-    async function fetchHistory() {
-      const res = await fetch('/api/orders/user');
-      const list = document.getElementById('historyList');
-      list.innerHTML = '';
-      const history = await res.json();
-      history.reverse().forEach(o => {
-        const div = document.createElement('div');
-        div.innerHTML = `<strong>${o.description}</strong><br>
-          ${o.price} ₴ — <em>${o.status}</em><br>
-          ${o.username ? `<small>@${o.username}</small><br>` : ''}
-          ${o.reason ? `<small>Причина: ${o.reason}</small><br>` : ''}`;
-        list.appendChild(div);
-      });
-    }
+    document.getElementById('starsAmount').addEventListener('input', updateStarPrice);
 
-    function toggleTheme() {
-      dark = !dark;
+    document.getElementById('themeBtn').addEventListener('click', () => {
       document.body.classList.toggle('dark');
-      document.querySelector('.toggle-theme').innerText = dark ? '🌙' : '🌞';
-    }
-
-    function openHistory() {
-      document.getElementById('historyModal').style.display = 'flex';
-      fetchHistory();
-    }
-
-    function closeModal(e) {
-      if (e.target.classList.contains('modal')) e.target.style.display = 'none';
-    }
-
-    function closeHistory() {
-      document.getElementById('historyModal').style.display = 'none';
-    }
+      document.getElementById('themeBtn').textContent = document.body.classList.contains('dark') ? '🌙' : '🌞';
+    });
 
     fetchPrices();
     fetchStatus();
