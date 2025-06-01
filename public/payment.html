@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="ru">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -88,7 +89,8 @@
     <input type="file" id="screenshot" accept="image/*,.pdf">
     <button class="submit" onclick="submitPayment()">Подтвердить Оплату</button>
     <p class="success-message" id="successMessage"></p>
-  </div>  <script>
+  </div>
+  <script>
     let prices = {};
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
@@ -106,7 +108,7 @@
       else if (productId === 'premium6') price = prices.premium6;
       else if (productId === 'premium12') price = prices.premium12;
       else if (productId === 'stars') {
-        const perStar = stars >= prices.promoLimit ? prices.starsPromo : prices.starsBase;
+        const perStar = stars >= prices.promoLimit && prices.promoEnabled ? prices.starsPromo : prices.starsBase;
         price = (perStar * stars).toFixed(2);
       }
       document.getElementById('price').textContent = price;
@@ -145,5 +147,6 @@
     }
 
     fetchPrices();
-  </script></body>
+  </script>
+</body>
 </html>
