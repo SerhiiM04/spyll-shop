@@ -1,70 +1,36 @@
+const express = require('express'); const fs = require('fs'); const path = require('path'); const multer = require('multer'); const cors = require('cors');
 
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
+const app = express(); const PORT = process.env.PORT || 10000;
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+app.use(cors()); app.use(express.json()); app.use(express.static('public')); app.use('/uploads', express.static('uploads'));
 
-// Middleware
-app.use(express.json());
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
+const upload = multer({ dest: 'uploads/' });
 
-// In-memory storage (in production, use a database)
-let orders = [];
-let prices = {
-  premium3: 150, // UAH
-  premium6: 280, // UAH
-  premium12: 500, // UAH
-  starsBase: 10, // UAH per star
-  starsPromo: 8 // UAH per star (promotional)
-};
+const CONFIG_PATH = 'config.json'; const ORDERS_PATH = 'orders.json';
 
-// Routes
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// Ensure files exist if (!fs.existsSync(CONFIG_PATH)) { fs.writeFileSync(CONFIG_PATH, JSON.stringify({ premium3: 150, premium6: 280, premium12: 520, starsBase: 1.0, starsPromo: 0.8 }, null, 2)); } if (!fs.existsSync(ORDERS_PATH)) { fs.writeFileSync(ORDERS_PATH, '[]'); }
 
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
+// Load prices app.get('/api/prices', (req, res) => { const config = JSON.parse(fs.readFileSync(CONFIG_PATH)); res.json(config); });
 
-app.get('/api/prices', (req, res) => {
-  res.json(prices);
-});
+app.post('/api/prices', (req, res) => { fs.writeFileSync(CONFIG_PATH, JSON.stringify(req.body, null, 2)); res.json({ success: true }); });
 
-app.post('/api/prices', (req, res) => {
-  prices = { ...prices, ...req.body };
-  res.json({ success: true });
-});
+// Load config (for front + admin) app.get('/api/config', (req, res) => { const config = JSON.parse(fs.readFileSync(CONFIG_PATH)); res.json({ star_price: config.starsBase, promo_price: config.starsPromo, promo_min: 500 }); });
 
-app.post('/api/order', (req, res) => {
-  const order = {
-    id: Date.now(),
-    ...req.body,
-    status: 'pending',
-    timestamp: new Date().toISOString()
-  };
-  orders.push(order);
-  res.json({ success: true, orderId: order.id });
-});
+// Handle new payment submission app.post('/api/submit-payment', upload.single('screenshot'), (req, res) => { const orders = JSON.parse(fs.readFileSync(ORDERS_PATH)); const { productId, userId, username } = req.body; const fileName = req.file ? req.file.filename : null;
 
-app.get('/api/orders', (req, res) => {
-  res.json(orders);
-});
+const config = JSON.parse(fs.readFileSync(CONFIG_PATH)); let description = ''; let price = 0; let stars = 0;
 
-app.post('/api/orders/:id/status', (req, res) => {
-  const orderId = parseInt(req.params.id);
-  const order = orders.find(o => o.id === orderId);
-  if (order) {
-    order.status = req.body.status;
-    res.json({ success: true });
-  } else {
-    res.status(404).json({ error: 'Order not found' });
-  }
-});
+if (productId === 'stars') { stars = parseInt(req.body.stars || 0); price = stars >= 500 ? stars * config.starsPromo : stars * config.starsBase; description = Покупка звёзд; } else if (productId === 'premium3') { price = config.premium3; description = 'Telegram Premium на 3 месяца'; } else if (productId === 'premium6') { price = config.premium6; description = 'Telegram Premium на 6 месяцев'; } else if (productId === 'premium12') { price = config.premium12; description = 'Telegram Premium на 12 месяцев'; }
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const newOrder = { id: Date.now(), productId, userId, username, price: price.toFixed(2), stars, fileName, status: 'pending', timestamp: Date.now(), description };
+
+orders.unshift(newOrder); fs.writeFileSync(ORDERS_PATH, JSON.stringify(orders, null, 2)); res.json({ success: true }); });
+
+// Get all orders app.get('/api/orders', (req, res) => { const orders = JSON.parse(fs.readFileSync(ORDERS_PATH)); res.json(orders); });
+
+// Update order status app.post('/api/orders/:id/status', (req, res) => { const orders = JSON.parse(fs.readFileSync(ORDERS_PATH)); const orderId = parseInt(req.params.id); const { status } = req.body;
+
+const order = orders.find(o => o.id === orderId); if (order) { order.status = status; fs.writeFileSync(ORDERS_PATH, JSON.stringify(orders, null, 2)); res.json({ success: true }); } else { res.status(404).json({ error: 'Order not found' }); } });
+
+app.listen(PORT, () => console.log(Server running on port ${PORT}));
+
