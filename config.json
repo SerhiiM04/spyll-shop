@@ -4,5 +4,7 @@
   "premium12": 520,
   "starsBase": 1.0,
   "starsPromo": 0.8,
-  "promoLimit": 500
+  "promoLimit": 500,
+  "premiumImage": "/images/default-premium.jpg",
+  "starsImage": "/images/default-stars.jpg"
 }
