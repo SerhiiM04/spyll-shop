@@ -1,116 +1,123 @@
-<!DOCTYPE html><html lang="ru">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>✨ Spyll Shop</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f1f1;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .card p {
+      margin-bottom: 10px;
+    }
+    .buy-btn {
+      padding: 10px 20px;
+      border: none;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .input-field {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>✨ Spyll Shop</h1><div class="product-list" id="product-list"></div>
+  <h1>✨ Spyll Shop</h1>
 
-<div class="payment-overlay" id="payment-modal">
-  <div class="payment-box">
-    <span class="close-btn" onclick="closeModal()">&times;</span>
-    <h2>Оплата заказа</h2>
-    <p><strong>Перевод на карту:</strong> 5355 2802 1897 6700</p>
-    <p><strong>Сумма к оплате:</strong> <span id="amount-display">0</span> UAH</p>
-    <p><strong>Комментарий к платежу:</strong> Подарок</p>
-    <p>После перевода обязательно прикрепите скриншот (.pdf / .jpg)</p>
-
-    <input type="file" id="screenshot" />
-    <button onclick="submitPayment()">Подтвердить Оплату</button>
+  <div class="card">
+    <h2>Telegram Premium – 3 месяца</h2>
+    <p id="price3">150 ₴</p>
+    <button class="buy-btn" onclick="buy('premium3')">Купить</button>
   </div>
-</div>
 
-<div class="status-box" id="status-box" style="display:none">
-  <span>⏳ Обработка платежа</span>
-</div>
+  <div class="card">
+    <h2>Telegram Premium – 6 месяцев</h2>
+    <p id="price6">280 ₴</p>
+    <button class="buy-btn" onclick="buy('premium6')">Купить</button>
+  </div>
 
-  </div>  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    const user = tg.initDataUnsafe?.user;
+  <div class="card">
+    <h2>Telegram Premium – 12 месяцев</h2>
+    <p id="price12">400 ₴</p>
+    <button class="buy-btn" onclick="buy('premium12')">Купить</button>
+  </div>
 
-    const products = [
-      { id: 'premium3', title: 'Telegram Premium - 3 месяца', price: 0 },
-      { id: 'premium6', title: 'Telegram Premium - 6 месяцев', price: 0 },
-      { id: 'premium12', title: 'Telegram Premium - 12 месяцев', price: 0 },
-      { id: 'stars', title: 'Покупка звёзд', dynamic: true },
-    ];
+  <div class="card">
+    <h2>Покупка звёзд ⭐️</h2>
+    <input class="input-field" type="number" id="starsAmount" placeholder="Введите количество звёзд" />
+    <p id="starsPrice">0 ₴</p>
+    <button class="buy-btn" onclick="buyStars()">Купить</button>
+  </div>
 
-    let config = {
-      star_price: 1,
-      promo_min: 500,
-      promo_price: 0.8
-    };
+  <div class="card" id="saleBlock" style="display: none;">
+    <h2>🎁 Акция на звёзды!</h2>
+    <p>При покупке от <span id="promoLimit">500</span> звёзд — цена ниже!</p>
+  </div>
+
+  <script>
+    let prices = {};
 
     async function fetchPrices() {
-      const res = await fetch('/api/config');
-      config = await res.json();
+      const res = await fetch('/api/prices');
+      prices = await res.json();
 
-      const list = document.getElementById('product-list');
-      list.innerHTML = '';
-      products.forEach(product => {
-        const div = document.createElement('div');
-        div.className = 'product';
-        div.innerHTML = `
-          <h3>${product.title}</h3>
-          ${product.dynamic ? `
-            <input type="number" id="starCount" placeholder="Введите количество звёзд" oninput="updateStarPrice()">
-            <p id="starPrice">Цена: 0 ₴</p>
-            <p class="promo-msg">🎁 Акция при покупке от ${config.promo_min} звёзд — ${config.promo_price} ₴ за звезду</p>
-          ` : `<p>${product.price} ₴</p>`}
-          <button onclick="openModal('${product.id}')">Купить</button>
-        `;
-        list.appendChild(div);
-      });
+      document.getElementById('price3').innerText = prices.premium3 + ' ₴';
+      document.getElementById('price6').innerText = prices.premium6 + ' ₴';
+      document.getElementById('price12').innerText = prices.premium12 + ' ₴';
+      document.getElementById('promoLimit').innerText = prices.promoLimit || 500;
+
+      updateStarPrice();
+      document.getElementById('saleBlock').style.display = 'block';
     }
 
     function updateStarPrice() {
-      const count = parseInt(document.getElementById('starCount').value) || 0;
-      const price = count >= config.promo_min ? config.promo_price * count : config.star_price * count;
-      document.getElementById('starPrice').innerText = `Цена: ${price.toFixed(2)} ₴`;
+      const stars = parseInt(document.getElementById('starsAmount').value || 0);
+      let perStar = stars >= (prices.promoLimit || 500) ? prices.starsPromo : prices.starsBase;
+      const total = (stars * perStar).toFixed(2);
+      document.getElementById('starsPrice').innerText = total + ' ₴';
     }
 
-    let currentProductId = '';
-    function openModal(productId) {
-      currentProductId = productId;
-      let price = 0;
-      if (productId === 'stars') {
-        const count = parseInt(document.getElementById('starCount').value) || 0;
-        price = count >= config.promo_min ? config.promo_price * count : config.star_price * count;
-      } else {
-        const product = products.find(p => p.id === productId);
-        price = product.price;
-      }
-      document.getElementById('amount-display').innerText = price.toFixed(2);
-      document.getElementById('payment-modal').style.display = 'flex';
+    function buy(productId) {
+      window.location.href = `/public/payment.html?product=${productId}`;
     }
 
-    function closeModal() {
-      document.getElementById('payment-modal').style.display = 'none';
+    function buyStars() {
+      const amount = parseInt(document.getElementById('starsAmount').value || 0);
+      if (amount <= 0) return alert('Введите количество звёзд');
+      window.location.href = `/public/payment.html?product=stars&count=${amount}`;
     }
 
-    async function submitPayment() {
-      const formData = new FormData();
-      formData.append('productId', currentProductId);
-      formData.append('userId', user?.id || 'unknown');
-      formData.append('username', user?.username || '');
-      formData.append('screenshot', document.getElementById('screenshot').files[0]);
-
-      const res = await fetch('/api/submit-payment', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (res.ok) {
-        closeModal();
-        document.getElementById('status-box').style.display = 'block';
-      }
-    }
+    document.getElementById('starsAmount').addEventListener('input', updateStarPrice);
 
     fetchPrices();
-  </script></body>
+  </script>
+</body>
 </html>
