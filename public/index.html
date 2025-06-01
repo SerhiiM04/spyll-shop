@@ -2,89 +2,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spyll Shop</title>
+  <title>✨ Spyll Shop</title>
+  <link rel="stylesheet" href="style.css" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f1f1f1;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    .product-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      max-width: 500px;
-      margin: auto;
-    }
-    .product {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .product h2 {
-      margin: 0 0 10px;
-      font-size: 20px;
-    }
-    .product p {
-      font-size: 16px;
-      color: #666;
-    }
-    .product button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background-color: #0088cc;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .product button:hover {
-      background-color: #006fa3;
-    }
-  </style>
 </head>
 <body>
-  <h1>✨ Spyll Shop</h1>
-  <div class="product-list" id="products"></div>  <script>
+  <div class="container">
+    <h1>✨ Spyll Shop</h1><div class="product-list" id="product-list"></div>
+
+<div class="payment-overlay" id="payment-modal">
+  <div class="payment-box">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h2>Оплата заказа</h2>
+    <p><strong>Перевод на карту:</strong> 5355 2802 1897 6700</p>
+    <p><strong>Сумма к оплате:</strong> <span id="amount-display">0</span> UAH</p>
+    <p><strong>Комментарий к платежу:</strong> Подарок</p>
+    <p>После перевода обязательно прикрепите скриншот (.pdf / .jpg)</p>
+
+    <input type="file" id="screenshot" />
+    <button onclick="submitPayment()">Подтвердить Оплату</button>
+  </div>
+</div>
+
+<div class="status-box" id="status-box" style="display:none">
+  <span>⏳ Обработка платежа</span>
+</div>
+
+  </div>  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    const user = tg.initDataUnsafe?.user;
+
     const products = [
-      { id: 1, title: 'Telegram Premium - 3 месяца', price: 150 },
-      { id: 2, title: 'Telegram Premium - 6 месяцев', price: 280 },
-      { id: 3, title: 'Telegram Premium - 12 месяцев', price: 520 },
+      { id: 'premium3', title: 'Telegram Premium - 3 месяца', price: 0 },
+      { id: 'premium6', title: 'Telegram Premium - 6 месяцев', price: 0 },
+      { id: 'premium12', title: 'Telegram Premium - 12 месяцев', price: 0 },
+      { id: 'stars', title: 'Покупка звёзд', dynamic: true },
     ];
 
-    const container = document.getElementById('products');
+    let config = {
+      star_price: 1,
+      promo_min: 500,
+      promo_price: 0.8
+    };
 
-    products.forEach(product => {
-      const div = document.createElement('div');
-      div.className = 'product';
-      div.innerHTML = `
-        <h2>${product.title}</h2>
-        <p>${product.price} ₴</p>
-        <button onclick="buy(${product.id})">Купить</button>
-      `;
-      container.appendChild(div);
-    });
+    async function fetchPrices() {
+      const res = await fetch('/api/config');
+      config = await res.json();
 
-    function buy(productId) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return alert('Товар не найден');
-
-      Telegram.WebApp.showAlert(
-        `Вы выбрали: ${product.title}\nЦена: ${product.price} ₴`
-      );
-
-      // Тут можно вызвать WebApp.sendData или открыть инвойс через Telegram бота
+      const list = document.getElementById('product-list');
+      list.innerHTML = '';
+      products.forEach(product => {
+        const div = document.createElement('div');
+        div.className = 'product';
+        div.innerHTML = `
+          <h3>${product.title}</h3>
+          ${product.dynamic ? `
+            <input type="number" id="starCount" placeholder="Введите количество звёзд" oninput="updateStarPrice()">
+            <p id="starPrice">Цена: 0 ₴</p>
+            <p class="promo-msg">🎁 Акция при покупке от ${config.promo_min} звёзд — ${config.promo_price} ₴ за звезду</p>
+          ` : `<p>${product.price} ₴</p>`}
+          <button onclick="openModal('${product.id}')">Купить</button>
+        `;
+        list.appendChild(div);
+      });
     }
+
+    function updateStarPrice() {
+      const count = parseInt(document.getElementById('starCount').value) || 0;
+      const price = count >= config.promo_min ? config.promo_price * count : config.star_price * count;
+      document.getElementById('starPrice').innerText = `Цена: ${price.toFixed(2)} ₴`;
+    }
+
+    let currentProductId = '';
+    function openModal(productId) {
+      currentProductId = productId;
+      let price = 0;
+      if (productId === 'stars') {
+        const count = parseInt(document.getElementById('starCount').value) || 0;
+        price = count >= config.promo_min ? config.promo_price * count : config.star_price * count;
+      } else {
+        const product = products.find(p => p.id === productId);
+        price = product.price;
+      }
+      document.getElementById('amount-display').innerText = price.toFixed(2);
+      document.getElementById('payment-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('payment-modal').style.display = 'none';
+    }
+
+    async function submitPayment() {
+      const formData = new FormData();
+      formData.append('productId', currentProductId);
+      formData.append('userId', user?.id || 'unknown');
+      formData.append('username', user?.username || '');
+      formData.append('screenshot', document.getElementById('screenshot').files[0]);
+
+      const res = await fetch('/api/submit-payment', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        closeModal();
+        document.getElementById('status-box').style.display = 'block';
+      }
+    }
+
+    fetchPrices();
   </script></body>
 </html>
