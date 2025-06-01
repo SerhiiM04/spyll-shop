@@ -1,9 +1,8 @@
-
 <!DOCTYPE html><html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌟 Spyll Admin</title>
+  <title>✩ Spyll Admin</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -61,7 +60,8 @@
     <h2>Вход в админку</h2>
     <input type="password" id="adminPassword" placeholder="Введите пароль" />
     <button onclick="checkPassword()">Войти</button>
-  </div>  <div class="panel" id="adminPanel" style="display: none;">
+  </div>
+  <div class="panel" id="adminPanel" style="display: none;">
     <h2>Настройки магазина</h2>
     <label>Premium 3 мес:</label>
     <input type="number" id="premium3">
@@ -75,7 +75,11 @@
     <input type="number" id="starsPromo" step="0.01">
     <label>Лимит акции (от скольки звёзд):</label>
     <input type="number" id="promoLimit">
-    <button onclick="savePrices()">💾 Сохранить</button><h2 style="margin-top: 40px;">Заказы</h2>
+    <label>
+      <input type="checkbox" id="promoEnabled">
+      Включить акцию на звёзды
+    </label>
+    <button onclick="savePrices()">📂 Сохранить</button><h2 style="margin-top: 40px;">Заказы</h2>
 <div id="orders"></div>
 
   </div>  <script>
@@ -100,6 +104,7 @@
       document.getElementById('starsBase').value = prices.starsBase;
       document.getElementById('starsPromo').value = prices.starsPromo;
       document.getElementById('promoLimit').value = prices.promoLimit;
+      document.getElementById('promoEnabled').checked = prices.promoEnabled;
     }
 
     async function savePrices() {
@@ -109,7 +114,8 @@
         premium12: +document.getElementById('premium12').value,
         starsBase: +document.getElementById('starsBase').value,
         starsPromo: +document.getElementById('starsPromo').value,
-        promoLimit: +document.getElementById('promoLimit').value
+        promoLimit: +document.getElementById('promoLimit').value,
+        promoEnabled: document.getElementById('promoEnabled').checked
       };
       const res = await fetch('/api/prices', {
         method: 'POST',
