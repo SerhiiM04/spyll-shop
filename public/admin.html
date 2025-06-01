@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spyll Shop - Админ панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        <script>
+  window.onerror = function(message, source, lineno, colno, error) {
+    alert("Ошибка: " + message + "\nФайл: " + source + "\nСтрока: " + lineno);
+  };
+</script>
+            body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .price-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .price-item label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .price-item input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .price-item input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .save-btn {
+            background: #00b894;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+        
+        .save-btn:hover {
+            background: #00a085;
+        }
+        
+        .orders-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .order-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .order-card.pending {
+            border-left-color: #ffeaa7;
+        }
+        
+        .order-card.approved {
+            border-left-color: #00b894;
+        }
+        
+        .order-card.rejected {
+            border-left-color: #e17055;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .order-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .order-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .order-status.pending {
+            background: #ffeaa7;
+            color: #b8860b;
+        }
+        
+        .order-status.approved {
+            background: #00b894;
+            color: white;
+        }
+        
+        .order-status.rejected {
+            background: #e17055;
+            color: white;
+        }
+        
+        .order-details {
+            margin-bottom: 15px;
+        }
+        
+        .order-details p {
+            margin-bottom: 5px;
+        }
+        
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .approve-btn {
+            background: #00b894;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .reject-btn {
+            background: #e17055;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌟 Spyll Shop - Админ панель</h1>
+        <p>Управление магазином и заказами</p>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('prices')">Управление ценами</button>
+        <button class="tab" onclick="showTab('orders')">Заказы</button>
+    </div>
+    
+    <div id="pricesTab" class="tab-content">
+        <h2>Настройка цен</h2>
+        <p style="margin-bottom: 30px; color: #666;">Все цены указываются в UAH</p>
+        
+        <div class="price-grid">
+            <div class="price-item">
+                <label>Telegram Premium - 3 месяца</label>
+                <input type="number" id="premium3" placeholder="Цена в UAH">
+            </div>
+            
+            <div class="price-item">
+                <label>Telegram Premium - 6 месяцев</label>
+                <input type="number" id="premium6" placeholder="Цена в UAH">
+            </div>
+            
+            <div class="price-item">
+                <label>Telegram Premium - 12 месяцев</label>
+                <input type="number" id="premium12" placeholder="Цена в UAH">
+            </div>
+            
+            <div class="price-item">
+                <label>Цена за звезду (обычная)</label>
+                <input type="number" id="starsBase" placeholder="Цена за 1 звезду в UAH" step="0.1">
+            </div>
+            
+            <div class="price-item">
+                <label>Цена за звезду (акция)</label>
+                <input type="number" id="starsPromo" placeholder="Акционная цена за 1 звезду в UAH" step="0.1">
+            </div>
+        </div>
+        
+        <button class="save-btn" onclick="savePrices()">Сохранить цены</button>
+    </div>
+    
+    <div id="ordersTab" class="tab-content hidden">
+        <h2>Управление заказами</h2>
+        <button class="refresh-btn" onclick="loadOrders()">🔄 Обновить заказы</button>
+        
+        <div id="ordersList" class="orders-list">
+            <!-- Orders will be loaded here -->
+        </div>
+    </div>
+    
+    <script>
+        let currentPrices = {};
+        
+        function showTab(tabName) {
+            // Hide all tabs
+            document.getElementById('pricesTab').classList.add('hidden');
+            document.getElementById('ordersTab').classList.add('hidden');
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            event.target.classList.add('active');
+            
+            if (tabName === 'orders') {
+                loadOrders();
+            }
+        }
+        
+        async function loadPrices() {
+            try {
+                const response = await fetch('/api/prices');
+                currentPrices = await response.json();
+                
+                document.getElementById('premium3').value = currentPrices.premium3;
+                document.getElementById('premium6').value = currentPrices.premium6;
+                document.getElementById('premium12').value = currentPrices.premium12;
+                document.getElementById('starsBase').value = currentPrices.starsBase;
+                document.getElementById('starsPromo').value = currentPrices.starsPromo;
+            } catch (error) {
+                console.error('Error loading prices:', error);
+                alert('Ошибка загрузки цен');
+            }
+        }
+        
+        async function savePrices() {
+            const prices = {
+                premium3: parseInt(document.getElementById('premium3').value),
+                premium6: parseInt(document.getElementById('premium6').value),
+                premium12: parseInt(document.getElementById('premium12').value),
+                starsBase: parseFloat(document.getElementById('starsBase').value),
+                starsPromo: parseFloat(document.getElementById('starsPromo').value)
+            };
+            
+            try {
+                const response = await fetch('/api/prices', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(prices)
+                });
+                
+                if (response.ok) {
+                    alert('Цены успешно сохранены!');
+                } else {
+                    alert('Ошибка при сохранении цен');
+                }
+            } catch (error) {
+                console.error('Error saving prices:', error);
+                alert('Ошибка при сохранении цен');
+            }
+        }
+        
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/orders');
+                const orders = await response.json();
+                
+                const ordersList = document.getElementById('ordersList');
+                ordersList.innerHTML = '';
+                
+                if (orders.length === 0) {
+                    ordersList.innerHTML = '<p style="text-align: center; color: #666;">Нет заказов</p>';
+                    return;
+                }
+                
+                orders.forEach(order => {
+                    const orderCard = document.createElement('div');
+                    orderCard.className = `order-card ${order.status}`;
+                    
+                    orderCard.innerHTML = `
+                        <div class="order-header">
+                            <span class="order-id">Заказ #${order.id}</span>
+                            <span class="order-status ${order.status}">${getStatusText(order.status)}</span>
+                        </div>
+                        <div class="order-details">
+                            <p><strong>Товар:</strong> ${order.description}</p>
+                            <p><strong>Сумма:</strong> ${order.price} UAH</p>
+                            ${order.stars > 0 ? `<p><strong>Количество звёзд:</strong> ${order.stars}</p>` : ''}
+                            <p><strong>Пользователь:</strong> @${order.username} (ID: ${order.userId})</p>
+                            <p><strong>Файл:</strong> ${order.fileName || 'Не прикреплен'}</p>
+                            <p><strong>Время заказа:</strong> ${new Date(order.timestamp).toLocaleString('ru-RU')}</p>
+                            <p><strong>Карта для перевода:</strong> 5355 2802 1897 6700</p>
+                        </div>
+                        ${order.status === 'pending' ? `
+                            <div class="order-actions">
+                                <button class="approve-btn" onclick="updateOrderStatus(${order.id}, 'approved')">Подтвердить платёж</button>
+                                <button class="reject-btn" onclick="updateOrderStatus(${order.id}, 'rejected')">Отклонить платеж</button>
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    ordersList.appendChild(orderCard);
+                });
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                alert('Ошибка загрузки заказов');
+            }
+        }
+        
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch(`/api/orders/${orderId}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+                
+                if (response.ok) {
+                    loadOrders(); // Reload orders
+                    alert(status === 'approved' ? 'Платеж подтвержден!' : 'Платеж отклонен!');
+                } else {
+                    alert('Ошибка при обновлении статуса заказа');
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                alert('Ошибка при обновлении статуса заказа');
+            }
+        }
+        
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return 'Ожидает';
+                case 'approved': return 'Одобрен';
+                case 'rejected': return 'Отклонен';
+                default: return status;
+            }
+        }
+        
+        // Initialize
+        loadPrices();
+    </script>
+</body>
+</html>
