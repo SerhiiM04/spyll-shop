@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f0f0;
+      background: #eeeeee;
       padding: 20px;
     }
     header {
@@ -21,15 +21,11 @@
       font-size: 24px;
       margin: 0;
     }
-    .icon-history {
-      display: flex;
-      align-items: center;
+    .history-link {
+      font-size: 14px;
+      text-decoration: underline;
+      color: #555;
       cursor: pointer;
-    }
-    .icon-history span {
-      margin-left: 8px;
-      font-size: 12px;
-      color: #333;
     }
     .status-badge {
       padding: 6px 12px;
@@ -39,16 +35,43 @@
       color: white;
       display: none;
     }
-    .status-pending { background-color: #f1c40f; }
-    .status-approved { background-color: #2ecc71; }
-    .status-rejected { background-color: #e74c3c; }
-
+    .status-pending {
+      background-color: #f1c40f;
+    }
+    .status-approved {
+      background-color: #2ecc71;
+    }
+    .status-rejected {
+      background-color: #e74c3c;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
     .card {
       background: white;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .card img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 15px;
+    }
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .card p {
+      font-size: 16px;
+      margin-bottom: 10px;
     }
     .buy-btn {
       background-color: #007bff;
@@ -57,6 +80,8 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      font-weight: bold;
+      width: 100%;
     }
     .input-field {
       width: 100%;
@@ -66,13 +91,16 @@
       border: 1px solid #ccc;
       border-radius: 8px;
     }
-
     #saleBlock {
-      display: none;
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 20px;
+      text-align: center;
+      color: #856404;
+      font-weight: bold;
     }
-
     #history {
-      display: none;
       margin-top: 40px;
     }
     .history-item {
@@ -87,44 +115,49 @@
 <body>
   <header>
     <h1>🌟 Spyll Shop</h1>
-    <div style="display: flex; align-items: center; gap: 10px;">
+    <div>
       <div id="paymentStatus" class="status-badge"></div>
-      <div class="icon-history" onclick="toggleHistory()">
-        📜<span>История</span>
-      </div>
+      <div class="history-link" onclick="scrollToHistory()">🕘 История</div>
     </div>
   </header>
 
-  <div class="card">
-    <h2>Telegram Premium – 3 месяца</h2>
-    <p id="price3">Загрузка...</p>
-    <button class="buy-btn" onclick="buy('premium3')">Купить</button>
-  </div>
-  <div class="card">
-    <h2>Telegram Premium – 6 месяцев</h2>
-    <p id="price6">Загрузка...</p>
-    <button class="buy-btn" onclick="buy('premium6')">Купить</button>
-  </div>
-  <div class="card">
-    <h2>Telegram Premium – 12 месяцев</h2>
-    <p id="price12">Загрузка...</p>
-    <button class="buy-btn" onclick="buy('premium12')">Купить</button>
+  <div class="product-grid">
+    <div class="card">
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Premium">
+      <h2>Telegram Premium – 3 мес</h2>
+      <p id="price3">Загрузка...</p>
+      <button class="buy-btn" onclick="buy('premium3')">Купить</button>
+    </div>
+
+    <div class="card">
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Premium">
+      <h2>Telegram Premium – 6 мес</h2>
+      <p id="price6">Загрузка...</p>
+      <button class="buy-btn" onclick="buy('premium6')">Купить</button>
+    </div>
+
+    <div class="card">
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Premium">
+      <h2>Telegram Premium – 12 мес</h2>
+      <p id="price12">Загрузка...</p>
+      <button class="buy-btn" onclick="buy('premium12')">Купить</button>
+    </div>
+
+    <div class="card">
+      <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Звёзды">
+      <h2>Покупка звёзд ⭐️</h2>
+      <input class="input-field" id="starsAmount" type="number" placeholder="Введите количество звёзд" />
+      <p id="starsPrice">0 ₴</p>
+      <button class="buy-btn" onclick="buyStars()">Купить</button>
+    </div>
   </div>
 
-  <div class="card">
-    <h2>Покупка звёзд ⭐️</h2>
-    <input class="input-field" id="starsAmount" type="number" placeholder="Введите количество звёзд" />
-    <p id="starsPrice">0 ₴</p>
-    <button class="buy-btn" onclick="buyStars()">Купить</button>
-  </div>
-
-  <div class="card" id="saleBlock">
-    <h3>🎁 Акция на звёзды!</h3>
-    <p>При покупке от <span id="promoLimit">500</span> звёзд — цена ниже!</p>
+  <div id="saleBlock" style="display:none;">
+    🎁 Акция! При покупке от <span id="promoLimit">500</span> звёзд — сниженная цена!
   </div>
 
   <div id="history">
-    <h3>🕘 История покупок</h3>
+    <h3>🧾 История покупок</h3>
     <div id="historyList"></div>
   </div>
 
@@ -140,7 +173,7 @@
       document.getElementById('price12').innerText = prices.premium12 + ' ₴';
       document.getElementById('promoLimit').innerText = prices.promoLimit;
 
-      if (prices.promoLimit && prices.starsPromo < prices.starsBase) {
+      if (prices.starsPromo && prices.promoLimit) {
         document.getElementById('saleBlock').style.display = 'block';
       }
 
@@ -156,7 +189,7 @@
     }
 
     function buy(productId) {
-      window.location.href = `/payment?product=${productId}`;
+      window.location.href = `/payment?product=${productId}&count=${document.getElementById('starsAmount').value || ''}`;
     }
 
     function buyStars() {
@@ -165,28 +198,22 @@
       window.location.href = `/payment?product=stars&count=${amount}`;
     }
 
-    document.getElementById('starsAmount').addEventListener('input', updateStarPrice);
-
     async function fetchStatus() {
-      const res = await fetch('/api/orders/status', {
-        headers: {
-          'x-telegram-id': localStorage.getItem('telegramId') || 'user'
-        }
-      });
+      const res = await fetch('/api/orders/status');
       const status = await res.json();
 
       const el = document.getElementById('paymentStatus');
       if (status.status === 'pending') {
-        el.textContent = 'Ожидает подтверждения ⏳';
+        el.textContent = 'Ожидает ⏳';
         el.className = 'status-badge status-pending';
         el.style.display = 'inline-block';
       } else if (status.status === 'approved') {
-        el.textContent = 'Платёж подтверждён ✅';
+        el.textContent = 'Одобрено ✅';
         el.className = 'status-badge status-approved';
         el.style.display = 'inline-block';
         setTimeout(() => el.style.display = 'none', 5000);
       } else if (status.status === 'rejected') {
-        el.textContent = 'Платёж отклонён ❌';
+        el.textContent = 'Отклонено ❌';
         el.className = 'status-badge status-rejected';
         el.style.display = 'inline-block';
         setTimeout(() => el.style.display = 'none', 7000);
@@ -194,11 +221,7 @@
     }
 
     async function fetchHistory() {
-      const res = await fetch('/api/orders/user', {
-        headers: {
-          'x-telegram-id': localStorage.getItem('telegramId') || 'user'
-        }
-      });
+      const res = await fetch('/api/orders/user');
       const history = await res.json();
       const list = document.getElementById('historyList');
       list.innerHTML = '';
@@ -214,10 +237,11 @@
       });
     }
 
-    function toggleHistory() {
-      const el = document.getElementById('history');
-      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    function scrollToHistory() {
+      document.getElementById('history').scrollIntoView({ behavior: 'smooth' });
     }
+
+    document.getElementById('starsAmount').addEventListener('input', updateStarPrice);
 
     fetchPrices();
     fetchStatus();
