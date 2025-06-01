@@ -2,71 +2,78 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>История покупок</title>
   <style>
+    :root {
+      --bg: #eeeeee;
+      --card: #ffffff;
+      --text: #000000;
+    }
+    body.dark {
+      --bg: #1e1e1e;
+      --card: #2c2c2c;
+      --text: #ffffff;
+    }
     body {
       margin: 0;
+      background: var(--bg);
+      color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f0f0;
       padding: 20px;
-      color: #222;
     }
     h2 {
       text-align: center;
       margin-bottom: 20px;
     }
-    .history-container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .item {
-      background: white;
-      border-radius: 12px;
+    .history-item {
+      background: var(--card);
       padding: 15px;
       margin-bottom: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      border-left: 6px solid #ccc;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    .item.approved {
-      border-color: #2ecc71;
-    }
-    .item.rejected {
-      border-color: #e74c3c;
-    }
-    .item.pending {
-      border-color: #f1c40f;
-    }
-    .item strong {
+    .history-item strong {
       display: block;
       margin-bottom: 5px;
+      font-size: 16px;
     }
-    .item small {
-      color: #666;
+    .status {
+      font-weight: bold;
+      margin-top: 5px;
     }
-    .btn-back {
+    .approved {
+      color: #2ecc71;
+    }
+    .pending {
+      color: #f1c40f;
+    }
+    .rejected {
+      color: #e74c3c;
+    }
+    .back-btn {
       display: block;
-      width: 100%;
-      max-width: 600px;
       margin: 30px auto 0;
-      padding: 12px;
-      text-align: center;
+      padding: 12px 25px;
       background: #007bff;
       color: white;
       border: none;
       border-radius: 10px;
       font-size: 16px;
-      font-weight: bold;
-      text-decoration: none;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h2>🧾 История покупок</h2>
-  <div class="history-container" id="historyList"></div>
-  <a class="btn-back" href="/">← Назад</a>
+  <div id="historyList"></div>
+  <button class="back-btn" onclick="goBack()">← Назад</button>
 
   <script>
+    function goBack() {
+      window.location.href = '/';
+    }
+
     async function fetchHistory() {
       const res = await fetch('/api/orders/user');
       const history = await res.json();
@@ -75,18 +82,32 @@
 
       history.reverse().forEach(order => {
         const div = document.createElement('div');
-        div.className = 'item ' + order.status;
+        div.className = 'history-item';
+
         div.innerHTML = `
           <strong>${order.description}</strong>
-          ${order.price} ₴ — <em>${order.status === 'approved' ? 'Одобрено ✅' : order.status === 'rejected' ? 'Отклонено ❌' : 'Ожидает ⏳'}</em><br>
-          ${order.username ? `Пользователь: @${order.username}<br>` : ''}
-          ${order.stars ? `⭐ ${order.stars} звёзд<br>` : ''}
-          ${order.reason ? `<small>Причина: ${order.reason}</small>` : ''}
+          Цена: ${order.price} ₴<br>
+          ${order.stars ? `⭐ Кол-во звёзд: ${order.stars}<br>` : ''}
+          ${order.username ? `👤 @${order.username}<br>` : ''}
+          <span class="status ${order.status}">Статус: ${
+            order.status === 'approved' ? 'Одобрено ✅'
+            : order.status === 'rejected' ? 'Отклонено ❌'
+            : 'Ожидает ⏳'
+          }</span>
+          ${order.reason ? `<br><em>Причина: ${order.reason}</em>` : ''}
         `;
         list.appendChild(div);
       });
     }
 
+    function setTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        document.body.classList.add('dark');
+      }
+    }
+
+    setTheme();
     fetchHistory();
   </script>
 </body>
