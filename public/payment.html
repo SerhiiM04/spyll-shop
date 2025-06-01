@@ -1,63 +1,62 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Оплата заказа</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
   <style>
     :root {
-      --bg-light: #eeeeee;
+      --bg-light: #f0f0f0;
       --bg-dark: #121212;
-      --card-light: #ffffff;
-      --card-dark: #1e1e1e;
       --text-light: #000;
       --text-dark: #fff;
-      --primary: #007bff;
-      --green: #2ecc71;
-      --red: #e74c3c;
+      --card-light: #fff;
+      --card-dark: #1f1f1f;
+      --accent: #007bff;
+    }
+
+    html[data-theme='light'] {
+      --bg: var(--bg-light);
+      --text: var(--text-light);
+      --card: var(--card-light);
+    }
+
+    html[data-theme='dark'] {
+      --bg: var(--bg-dark);
+      --text: var(--text-dark);
+      --card: var(--card-dark);
     }
 
     body {
       margin: 0;
       padding: 20px;
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-light);
-      color: var(--text-light);
-      transition: 0.3s;
-    }
-
-    body.dark {
-      background: var(--bg-dark);
-      color: var(--text-dark);
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .container {
-      max-width: 480px;
+      max-width: 450px;
       margin: 40px auto;
-      background: var(--card-light);
+      background: var(--card);
       border-radius: 16px;
       padding: 25px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       text-align: center;
-      transition: 0.3s;
     }
 
-    body.dark .container {
-      background: var(--card-dark);
+    h2 {
+      margin-bottom: 20px;
     }
 
     .payment-info {
-      background: #f1f1f1;
+      background: #f9f9f9;
       padding: 15px;
       border-radius: 10px;
+      margin-bottom: 20px;
       font-size: 16px;
       text-align: left;
       position: relative;
-    }
-
-    body.dark .payment-info {
-      background: #2c2c2c;
     }
 
     .payment-info strong {
@@ -67,9 +66,9 @@
 
     .copy-btn {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      background: var(--primary);
+      top: 16px;
+      right: 16px;
+      background: var(--accent);
       color: white;
       border: none;
       padding: 6px 10px;
@@ -81,75 +80,67 @@
     input, button {
       width: 100%;
       padding: 12px;
-      margin-top: 12px;
+      margin-top: 10px;
       border-radius: 8px;
+      border: 1px solid #ccc;
       font-size: 15px;
     }
 
     input[type="file"] {
-      border: 1px solid #ccc;
+      padding: 8px;
     }
 
-    button.submit {
-      background: var(--green);
+    .btn-confirm {
+      background: #00b894;
       color: white;
-      border: none;
       font-weight: bold;
+      border: none;
+      margin-bottom: 10px;
     }
 
-    button.cancel {
-      background: var(--red);
+    .btn-cancel {
+      background: #e74c3c;
       color: white;
-      border: none;
       font-weight: bold;
+      border: none;
     }
 
     .success-message {
-      color: var(--green);
-      margin-top: 15px;
+      color: green;
       font-weight: bold;
-    }
-
-    .theme-toggle {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      font-size: 20px;
-      background: #ccc;
-      border-radius: 8px;
-      padding: 4px 10px;
-      cursor: pointer;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <div class="theme-toggle" onclick="toggleTheme()">🌞</div>
-
   <div class="container">
     <h2>Оплата заказа</h2>
     <div class="payment-info">
       <p><strong>Перевод на карту:</strong><br> <span id="cardNumber">5355 2802 1897 6700</span></p>
       <button class="copy-btn" onclick="copyCard()">Скопировать</button>
       <p><strong>Сумма к оплате:</strong> <span id="price">0</span> ₴</p>
-      <p><strong>Комментарий:</strong> Подарок</p>
-      <p>Отправьте скриншот оплаты (PNG, JPG или PDF), затем нажмите «Подтвердить оплату»</p>
+      <p><strong>Комментарий к платежу:</strong> Подарок</p>
+      <p>Прикрепите скриншот (PDF или PNG), затем нажмите кнопку подтверждения ⤵️</p>
     </div>
-    <input type="file" id="screenshot" accept="image/*,.pdf" />
-    <button class="submit" onclick="submitPayment()">Подтвердить оплату</button>
-    <button class="cancel" onclick="cancel()">Отмена</button>
+    <input type="file" id="screenshot" accept="image/*,.pdf">
+    <button class="btn-confirm" onclick="submitPayment()">Подтвердить оплату</button>
+    <button class="btn-cancel" onclick="cancel()">Отмена</button>
     <p class="success-message" id="successMessage"></p>
   </div>
 
   <script>
+    let prices = {};
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('product');
     const stars = parseInt(urlParams.get('count')) || 0;
 
-    let prices = {};
-
     async function fetchPrices() {
       const res = await fetch('/api/prices');
       prices = await res.json();
+      calculatePrice();
+    }
+
+    function calculatePrice() {
       let price = 0;
       if (productId === 'premium3') price = prices.premium3;
       else if (productId === 'premium6') price = prices.premium6;
@@ -158,15 +149,18 @@
         const perStar = stars >= prices.promoLimit ? prices.starsPromo : prices.starsBase;
         price = (perStar * stars).toFixed(2);
       }
-      document.getElementById('price').innerText = price;
+      document.getElementById('price').textContent = price;
     }
 
     async function submitPayment() {
-      const file = document.getElementById('screenshot').files[0];
-      if (!file) return alert('Прикрепите скриншот оплаты');
+      const fileInput = document.getElementById('screenshot');
+      if (!fileInput.files.length) {
+        alert('Пожалуйста, прикрепите скриншот оплаты.');
+        return;
+      }
 
       const formData = new FormData();
-      formData.append('screenshot', file);
+      formData.append('screenshot', fileInput.files[0]);
       formData.append('productId', productId);
       formData.append('stars', stars);
 
@@ -192,11 +186,6 @@
 
     function cancel() {
       window.location.href = '/';
-    }
-
-    function toggleTheme() {
-      document.body.classList.toggle('dark');
-      document.querySelector('.theme-toggle').textContent = document.body.classList.contains('dark') ? '🌙' : '🌞';
     }
 
     fetchPrices();
