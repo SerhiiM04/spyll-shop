@@ -1,19 +1,19 @@
 {
   "name": "spyll-shop",
   "version": "1.0.0",
-  "description": "",
+  "description": "Магазин Telegram Stars с админкой и оплатой",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Spyll",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "fs": "^0.0.1-security",
-    "multer": "^2.0.0",
+    "express": "^4.18.2",
+    "fs": "0.0.1-security",
+    "multer": "^1.4.5-lts.1",
     "path": "^0.12.7"
   }
 }
