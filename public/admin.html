@@ -1,1 +1,166 @@
 
+<!DOCTYPE html><html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌟 Spyll Admin</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .auth, .panel {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    input[type="password"], input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .order {
+      background: #f4f4f4;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-left: 5px solid #ccc;
+      border-radius: 8px;
+    }
+    .screenshot {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    .status-btns button {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth" id="authBlock">
+    <h2>Вход в админку</h2>
+    <input type="password" id="adminPassword" placeholder="Введите пароль" />
+    <button onclick="checkPassword()">Войти</button>
+  </div>  <div class="panel" id="adminPanel" style="display: none;">
+    <h2>Настройки магазина</h2>
+    <label>Premium 3 мес:</label>
+    <input type="number" id="premium3">
+    <label>Premium 6 мес:</label>
+    <input type="number" id="premium6">
+    <label>Premium 12 мес:</label>
+    <input type="number" id="premium12">
+    <label>Цена за 1 звезду:</label>
+    <input type="number" id="starsBase" step="0.01">
+    <label>Цена за 1 звезду (акция):</label>
+    <input type="number" id="starsPromo" step="0.01">
+    <label>Лимит акции (от скольки звёзд):</label>
+    <input type="number" id="promoLimit">
+    <button onclick="savePrices()">💾 Сохранить</button><h2 style="margin-top: 40px;">Заказы</h2>
+<div id="orders"></div>
+
+  </div>  <script>
+    function checkPassword() {
+      const pass = document.getElementById('adminPassword').value;
+      if (pass === 'Martynov27.12.2004') {
+        document.getElementById('authBlock').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        loadPrices();
+        loadOrders();
+      } else {
+        alert('Неверный пароль');
+      }
+    }
+
+    async function loadPrices() {
+      const res = await fetch('/api/prices');
+      const prices = await res.json();
+      document.getElementById('premium3').value = prices.premium3;
+      document.getElementById('premium6').value = prices.premium6;
+      document.getElementById('premium12').value = prices.premium12;
+      document.getElementById('starsBase').value = prices.starsBase;
+      document.getElementById('starsPromo').value = prices.starsPromo;
+      document.getElementById('promoLimit').value = prices.promoLimit;
+    }
+
+    async function savePrices() {
+      const prices = {
+        premium3: +document.getElementById('premium3').value,
+        premium6: +document.getElementById('premium6').value,
+        premium12: +document.getElementById('premium12').value,
+        starsBase: +document.getElementById('starsBase').value,
+        starsPromo: +document.getElementById('starsPromo').value,
+        promoLimit: +document.getElementById('promoLimit').value
+      };
+      const res = await fetch('/api/prices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prices)
+      });
+      if (res.ok) alert('Цены обновлены');
+      else alert('Ошибка сохранения');
+    }
+
+    async function loadOrders() {
+      const res = await fetch('/api/orders');
+      const orders = await res.json();
+      const container = document.getElementById('orders');
+      container.innerHTML = '';
+
+      orders.forEach(order => {
+        const div = document.createElement('div');
+        div.className = 'order';
+        div.innerHTML = `
+          <strong>${order.description}</strong><br>
+          ${order.price} UAH<br>
+          ${order.stars ? `${order.stars} звёзд<br>` : ''}
+          ${order.username ? `Пользователь: @${order.username}<br>` : ''}
+          ID: ${order.userId}<br>
+          <img src="/uploads/${order.fileName}" class="screenshot" />
+          <div class="status-btns">
+            <button onclick="updateOrder(${order.id}, 'approved')">✅ Одобрить</button>
+            <button onclick="rejectOrder(${order.id})">❌ Отклонить</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function rejectOrder(orderId) {
+      const reason = prompt('Укажите причину отказа');
+      if (!reason) return;
+      fetch(`/api/orders/${orderId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'rejected', reason })
+      }).then(loadOrders);
+    }
+
+    function updateOrder(orderId, status) {
+      fetch(`/api/orders/${orderId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      }).then(loadOrders);
+    }
+  </script></body>
+</html>
