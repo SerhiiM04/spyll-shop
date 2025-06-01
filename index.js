@@ -69,7 +69,7 @@ app.post('/api/submit-payment', upload.single('screenshot'), (req, res) => {
     username: req.headers['x-telegram-user'] || '',
     description:
       req.body.productId === 'stars'
-        ? `Покупка звёзд (${req.body.stars})`
+        ? `⭐ Покупка звёзд (${req.body.stars})`
         : `Telegram Premium (${req.body.productId})`,
     stars: +req.body.stars || 0,
     price: calculatePrice(config, req.body),
@@ -102,14 +102,16 @@ app.get('/api/orders', (req, res) => {
 
 app.get('/api/orders/status', (req, res) => {
   const id = req.headers['x-telegram-id'];
-  const order = loadOrders().reverse().find(o => o.userId == id);
+  const orders = loadOrders();
+  const order = orders.reverse().find(o => o.userId == id);
   if (!order) return res.json({ status: null });
   res.json({ status: order.status });
 });
 
 app.get('/api/orders/user', (req, res) => {
   const id = req.headers['x-telegram-id'];
-  const userOrders = loadOrders().filter(o => o.userId == id);
+  const orders = loadOrders();
+  const userOrders = orders.filter(o => o.userId == id);
   res.json(userOrders);
 });
 
@@ -123,17 +125,4 @@ app.post('/api/orders/:id/status', (req, res) => {
   res.sendStatus(200);
 });
 
-// ✅ Добавленные маршруты для страниц
-app.get('/payment', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'payment.html'));
-});
-
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'shop.html'));
-});
-
-app.listen(PORT, () => console.log(`Server started on ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Сервер запущен на порту ${PORT}`));
