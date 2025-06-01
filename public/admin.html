@@ -3,26 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌟 Spyll Admin</title>
+  <title>🌟 Spyll Admin Panel</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f9f9f9;
+      background: #eeeeee;
       margin: 0;
       padding: 20px;
     }
-    .auth, .panel {
-      max-width: 600px;
-      margin: 40px auto;
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
       background: white;
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     h2 {
+      text-align: center;
       margin-bottom: 20px;
     }
-    input[type="password"], input[type="number"] {
+    input[type="password"],
+    input[type="number"],
+    input[type="file"] {
       width: 100%;
       padding: 12px;
       margin-bottom: 15px;
@@ -31,59 +34,66 @@
       font-size: 16px;
     }
     label {
-      display: block;
       font-weight: bold;
       margin-top: 10px;
+      display: block;
     }
     button {
-      padding: 10px 20px;
       background: #007bff;
       color: white;
       border: none;
+      padding: 12px 25px;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
       margin-top: 10px;
     }
     .order {
-      background: #f4f4f4;
+      background: #f9f9f9;
+      border-left: 5px solid #ccc;
       padding: 15px;
       margin-bottom: 15px;
-      border-left: 5px solid #ccc;
-      border-radius: 8px;
+      border-radius: 10px;
     }
-    .screenshot {
+    .order img {
       max-width: 100%;
-      border-radius: 8px;
-      margin: 10px 0;
+      margin-top: 10px;
+      border-radius: 10px;
     }
-    .status-btns button {
-      margin-right: 10px;
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="auth" id="authBlock">
+  <div class="container" id="authBlock">
     <h2>Вход в админку</h2>
-    <input type="password" id="adminPassword" placeholder="Введите пароль" />
+    <input type="password" id="adminPassword" placeholder="Введите пароль">
     <button onclick="checkPassword()">Войти</button>
   </div>
 
-  <div class="panel" id="adminPanel" style="display: none;">
+  <div class="container hidden" id="adminPanel">
     <h2>Настройки магазина</h2>
-    <label>Premium 3 мес:</label>
-    <input type="number" id="premium3" />
-    <label>Premium 6 мес:</label>
-    <input type="number" id="premium6" />
-    <label>Premium 12 мес:</label>
-    <input type="number" id="premium12" />
-    <label>Цена за 1 звезду:</label>
-    <input type="number" id="starsBase" step="0.01" />
-    <label>Цена за 1 звезду (акция):</label>
-    <input type="number" id="starsPromo" step="0.01" />
+    <label>Telegram Premium – 3 мес (цена):</label>
+    <input type="number" id="premium3">
+    <label>Telegram Premium – 6 мес (цена):</label>
+    <input type="number" id="premium6">
+    <label>Telegram Premium – 12 мес (цена):</label>
+    <input type="number" id="premium12">
+    <label>Цена за звезду (обычная):</label>
+    <input type="number" step="0.01" id="starsBase">
+    <label>Цена за звезду (акция):</label>
+    <input type="number" step="0.01" id="starsPromo">
     <label>Лимит акции (от скольки звёзд):</label>
-    <input type="number" id="promoLimit" />
-    <button onclick="savePrices()">💾 Сохранить</button>
+    <input type="number" id="promoLimit">
+
+    <h2>Изображения товаров</h2>
+    <label>Картинка Telegram Premium:</label>
+    <input type="file" id="imgPremium" accept="image/*">
+    <label>Картинка звёзд:</label>
+    <input type="file" id="imgStars" accept="image/*">
+
+    <button onclick="saveSettings()">💾 Сохранить настройки</button>
 
     <h2 style="margin-top: 40px;">Заказы</h2>
     <div id="orders"></div>
@@ -93,27 +103,27 @@
     function checkPassword() {
       const pass = document.getElementById('adminPassword').value;
       if (pass === 'Martynov27.12.2004') {
-        document.getElementById('authBlock').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        loadPrices();
+        document.getElementById('authBlock').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        loadSettings();
         loadOrders();
       } else {
         alert('Неверный пароль');
       }
     }
 
-    async function loadPrices() {
+    async function loadSettings() {
       const res = await fetch('/api/prices');
-      const prices = await res.json();
-      document.getElementById('premium3').value = prices.premium3;
-      document.getElementById('premium6').value = prices.premium6;
-      document.getElementById('premium12').value = prices.premium12;
-      document.getElementById('starsBase').value = prices.starsBase;
-      document.getElementById('starsPromo').value = prices.starsPromo;
-      document.getElementById('promoLimit').value = prices.promoLimit;
+      const data = await res.json();
+      document.getElementById('premium3').value = data.premium3;
+      document.getElementById('premium6').value = data.premium6;
+      document.getElementById('premium12').value = data.premium12;
+      document.getElementById('starsBase').value = data.starsBase;
+      document.getElementById('starsPromo').value = data.starsPromo;
+      document.getElementById('promoLimit').value = data.promoLimit;
     }
 
-    async function savePrices() {
+    async function saveSettings() {
       const prices = {
         premium3: +document.getElementById('premium3').value,
         premium6: +document.getElementById('premium6').value,
@@ -122,13 +132,28 @@
         starsPromo: +document.getElementById('starsPromo').value,
         promoLimit: +document.getElementById('promoLimit').value
       };
-      const res = await fetch('/api/prices', {
+
+      await fetch('/api/prices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(prices)
       });
-      if (res.ok) alert('Цены обновлены');
-      else alert('Ошибка сохранения');
+
+      // Обновление картинок
+      const premiumFile = document.getElementById('imgPremium').files[0];
+      const starsFile = document.getElementById('imgStars').files[0];
+      if (premiumFile || starsFile) {
+        const form = new FormData();
+        if (premiumFile) form.append('premium', premiumFile);
+        if (starsFile) form.append('stars', starsFile);
+
+        await fetch('/api/upload-images', {
+          method: 'POST',
+          body: form
+        });
+      }
+
+      alert('Настройки обновлены!');
     }
 
     async function loadOrders() {
@@ -142,35 +167,34 @@
         div.className = 'order';
         div.innerHTML = `
           <strong>${order.description}</strong><br>
-          ${order.price} UAH<br>
-          ${order.stars ? `${order.stars} звёзд<br>` : ''}
+          ${order.price} ₴<br>
+          ${order.stars ? `⭐ ${order.stars} звёзд<br>` : ''}
           ${order.username ? `Пользователь: @${order.username}<br>` : ''}
           ID: ${order.userId}<br>
-          ${order.fileName ? `<img src="/uploads/${order.fileName}" class="screenshot" />` : ''}
-          <div class="status-btns">
-            <button onclick="updateOrder(${order.id}, 'approved')">✅ Одобрить</button>
-            <button onclick="rejectOrder(${order.id})">❌ Отклонить</button>
-          </div>
+          ${order.reason ? `<em>Причина отклонения: ${order.reason}</em><br>` : ''}
+          ${order.fileName ? `<img src="/uploads/${order.fileName}" alt="Скриншот">` : 'Нет скрина'}
+          <br>
+          <button onclick="approve(${order.id})">✅ Подтвердить</button>
+          <button onclick="reject(${order.id})">❌ Отклонить</button>
         `;
         container.appendChild(div);
       });
     }
 
-    function rejectOrder(orderId) {
-      const reason = prompt('Укажите причину отказа');
-      if (!reason) return;
-      fetch(`/api/orders/${orderId}/status`, {
+    function approve(id) {
+      fetch(`/api/orders/${id}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'rejected', reason })
+        body: JSON.stringify({ status: 'approved' })
       }).then(loadOrders);
     }
 
-    function updateOrder(orderId, status) {
-      fetch(`/api/orders/${orderId}/status`, {
+    function reject(id) {
+      const reason = prompt('Причина отклонения:');
+      fetch(`/api/orders/${id}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status: 'rejected', reason })
       }).then(loadOrders);
     }
   </script>
