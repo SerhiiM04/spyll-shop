@@ -1,8 +1,9 @@
-<!DOCTYPE html><html lang="ru">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✩ Spyll Admin</title>
+  <title>🌟 Spyll Admin</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -29,6 +30,11 @@
       border-radius: 8px;
       font-size: 16px;
     }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+    }
     button {
       padding: 10px 20px;
       background: #007bff;
@@ -37,6 +43,7 @@
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 10px;
     }
     .order {
       background: #f4f4f4;
@@ -61,28 +68,28 @@
     <input type="password" id="adminPassword" placeholder="Введите пароль" />
     <button onclick="checkPassword()">Войти</button>
   </div>
+
   <div class="panel" id="adminPanel" style="display: none;">
     <h2>Настройки магазина</h2>
     <label>Premium 3 мес:</label>
-    <input type="number" id="premium3">
+    <input type="number" id="premium3" />
     <label>Premium 6 мес:</label>
-    <input type="number" id="premium6">
+    <input type="number" id="premium6" />
     <label>Premium 12 мес:</label>
-    <input type="number" id="premium12">
+    <input type="number" id="premium12" />
     <label>Цена за 1 звезду:</label>
-    <input type="number" id="starsBase" step="0.01">
+    <input type="number" id="starsBase" step="0.01" />
     <label>Цена за 1 звезду (акция):</label>
-    <input type="number" id="starsPromo" step="0.01">
+    <input type="number" id="starsPromo" step="0.01" />
     <label>Лимит акции (от скольки звёзд):</label>
-    <input type="number" id="promoLimit">
-    <label>
-      <input type="checkbox" id="promoEnabled">
-      Включить акцию на звёзды
-    </label>
-    <button onclick="savePrices()">📂 Сохранить</button><h2 style="margin-top: 40px;">Заказы</h2>
-<div id="orders"></div>
+    <input type="number" id="promoLimit" />
+    <button onclick="savePrices()">💾 Сохранить</button>
 
-  </div>  <script>
+    <h2 style="margin-top: 40px;">Заказы</h2>
+    <div id="orders"></div>
+  </div>
+
+  <script>
     function checkPassword() {
       const pass = document.getElementById('adminPassword').value;
       if (pass === 'Martynov27.12.2004') {
@@ -104,7 +111,6 @@
       document.getElementById('starsBase').value = prices.starsBase;
       document.getElementById('starsPromo').value = prices.starsPromo;
       document.getElementById('promoLimit').value = prices.promoLimit;
-      document.getElementById('promoEnabled').checked = prices.promoEnabled;
     }
 
     async function savePrices() {
@@ -114,8 +120,7 @@
         premium12: +document.getElementById('premium12').value,
         starsBase: +document.getElementById('starsBase').value,
         starsPromo: +document.getElementById('starsPromo').value,
-        promoLimit: +document.getElementById('promoLimit').value,
-        promoEnabled: document.getElementById('promoEnabled').checked
+        promoLimit: +document.getElementById('promoLimit').value
       };
       const res = await fetch('/api/prices', {
         method: 'POST',
@@ -132,7 +137,7 @@
       const container = document.getElementById('orders');
       container.innerHTML = '';
 
-      orders.forEach(order => {
+      orders.reverse().forEach(order => {
         const div = document.createElement('div');
         div.className = 'order';
         div.innerHTML = `
@@ -141,7 +146,7 @@
           ${order.stars ? `${order.stars} звёзд<br>` : ''}
           ${order.username ? `Пользователь: @${order.username}<br>` : ''}
           ID: ${order.userId}<br>
-          <img src="/uploads/${order.fileName}" class="screenshot" />
+          ${order.fileName ? `<img src="/uploads/${order.fileName}" class="screenshot" />` : ''}
           <div class="status-btns">
             <button onclick="updateOrder(${order.id}, 'approved')">✅ Одобрить</button>
             <button onclick="rejectOrder(${order.id})">❌ Отклонить</button>
@@ -168,5 +173,6 @@
         body: JSON.stringify({ status })
       }).then(loadOrders);
     }
-  </script></body>
+  </script>
+</body>
 </html>
