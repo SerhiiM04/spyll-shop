@@ -113,5 +113,11 @@ app.post('/api/orders/:id/status', (req, res) => {
         res.status(404).json({ error: 'Order not found' });
     }
 });
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 
+app.get('/payment', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'payment.html'));
+});
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
