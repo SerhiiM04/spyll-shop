@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>История покупок</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #eeeeee;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .history-item {
+      background: #f9f9f9;
+      border-left: 5px solid #ccc;
+      padding: 10px 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+    .status {
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    .status.pending {
+      color: #f1c40f;
+    }
+    .status.approved {
+      color: #2ecc71;
+    }
+    .status.rejected {
+      color: #e74c3c;
+    }
+    .reason {
+      font-size: 13px;
+      color: #888;
+      margin-top: 5px;
+    }
+    button.back {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🧾 История покупок</h2>
+    <div id="historyList">Загрузка...</div>
+    <button class="back" onclick="goBack()">← Назад</button>
+  </div>
+
+  <script>
+    async function fetchHistory() {
+      const res = await fetch('/api/orders/user');
+      const history = await res.json();
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+
+      if (history.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#888;">Пока нет покупок</p>';
+        return;
+      }
+
+      history.reverse().forEach(order => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+          <strong>${order.description}</strong><br>
+          💳 ${order.price} ₴<br>
+          ${order.stars ? `⭐ ${order.stars} звёзд<br>` : ''}
+          👤 @${order.username}<br>
+          <div class="status ${order.status}">
+            ${getStatusText(order.status)}
+          </div>
+          ${order.reason ? `<div class="reason">Причина: ${order.reason}</div>` : ''}
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function getStatusText(status) {
+      if (status === 'pending') return 'Ожидает подтверждения ⏳';
+      if (status === 'approved') return 'Платёж подтверждён ✅';
+      if (status === 'rejected') return 'Платёж отклонён ❌';
+      return status;
+    }
+
+    function goBack() {
+      window.location.href = '/';
+    }
+
+    fetchHistory();
+  </script>
+</body>
+</html>
