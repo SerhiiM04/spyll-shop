@@ -61,3 +61,26 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Spyll_Shop запущен на http://localhost:${PORT}`);
 });
+// Добавление товара
+app.post('/api/add-product', upload.single('image'), (req, res) => {
+  const { title, description, price } = req.body;
+  const imagePath = req.file.path;
+
+  const product = {
+    id: Date.now(),
+    title,
+    description,
+    price,
+    image: imagePath.replace(/\\/g, '/')
+  };
+
+  const productsPath = './data/products.json';
+  const products = fs.existsSync(productsPath)
+    ? JSON.parse(fs.readFileSync(productsPath, 'utf-8'))
+    : [];
+
+  products.push(product);
+  fs.writeFileSync(productsPath, JSON.stringify(products, null, 2));
+
+  res.send({ success: true });
+});
