@@ -2,65 +2,29 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌟 Spyll Shop</title>
-  <link rel="stylesheet" href="/public/styles.css" />
-  <script defer src="/public/shop.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spyll_Shop</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="light">
-  <header>
-    <h1>🌟 Spyll Shop</h1>
-    <div class="controls">
-      <button id="themeToggle">🌓</button>
-      <div id="paymentStatus" class="status-badge"></div>
-    </div>
-  </header>
+<body>
+  <div class="app">
+    <header>
+      <h1 id="section-title">Магазин</h1>
+      <button id="theme-toggle">🌙</button>
+    </header>
 
-  <div class="product-grid">
-    <div class="card">
-      <img id="imgPremium" src="/images/premium.png" alt="Telegram Premium">
-      <h2>Telegram Premium – 3 мес</h2>
-      <p id="price3">Загрузка...</p>
-      <button class="buy-btn" onclick="buy('premium3')">Купить</button>
-    </div>
+    <main id="content">
+      <!-- Контент вкладок будет меняться здесь -->
+    </main>
 
-    <div class="card">
-      <img id="imgPremium2" src="/images/premium.png" alt="Telegram Premium">
-      <h2>Telegram Premium – 6 мес</h2>
-      <p id="price6">Загрузка...</p>
-      <button class="buy-btn" onclick="buy('premium6')">Купить</button>
-    </div>
-
-    <div class="card">
-      <img id="imgPremium3" src="/images/premium.png" alt="Telegram Premium">
-      <h2>Telegram Premium – 12 мес</h2>
-      <p id="price12">Загрузка...</p>
-      <button class="buy-btn" onclick="buy('premium12')">Купить</button>
-    </div>
-
-    <div class="card">
-      <img id="imgStars" src="/images/stars.png" alt="Звёзды">
-      <h2>Покупка звёзд</h2>
-      <input class="input-field" id="starsAmount" type="number" placeholder="Введите количество звёзд" />
-      <p id="starsPrice">0 ₴</p>
-      <button class="buy-btn" onclick="buyStars()">Купить</button>
-    </div>
+    <nav class="bottom-nav">
+      <button data-tab="profile">Профиль</button>
+      <button data-tab="shop" class="active">Магазин</button>
+      <button data-tab="games">Мини-Игры</button>
+      <button data-tab="wallet">Кошелёк</button>
+    </nav>
   </div>
 
-  <div id="saleBlock" style="display:none;">
-    🎁 Акция! При покупке от <span id="promoLimit">500</span> звёзд — сниженная цена!
-  </div>
-
-  <footer>
-    <button id="openHistory">🧾 История</button>
-  </footer>
-
-  <div id="historyModal" class="modal hidden">
-    <div class="modal-content">
-      <h3>🧾 История покупок</h3>
-      <div id="historyList"></div>
-      <button onclick="closeHistory()">⬅ Назад</button>
-    </div>
-  </div>
+  <script src="app.js"></script>
 </body>
 </html>
